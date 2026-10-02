@@ -1,0 +1,55 @@
+# --- Secrets / local config (never commit) ---
+Config/Secrets.xcconfig
+android/secrets.properties
+android/local.properties
+local.properties
+.env
+.env.*
+!.env.example
+server.env
+*.p8
+*.p12
+*.pem
+*.key
+*.cer
+*.mobileprovision
+*.keystore
+*.jks
+android/keystore/
+google-services.json
+GoogleService-Info.plist
+
+# --- Data ---
+server/data/
+/data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# --- Build output ---
+*.apk
+*.aab
+*.ipa
+*.xcarchive
+*.dSYM.zip
+build/
+DerivedData/
+.build/
+.swiftpm/
+Package.resolved
+**/*.xcuserstate
+xcuserdata/
+.gradle/
+.cxx/
+captures/
+
+# --- OS / editor ---
+.DS_Store
+._*
+Thumbs.db
+.idea/
+.vscode/
+*.swp

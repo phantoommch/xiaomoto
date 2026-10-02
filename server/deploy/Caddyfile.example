@@ -1,0 +1,5 @@
+# Caddy 反代到本机 8787。把站点名换成确认后的公网地址。
+# PUBLIC_BASE_URL 必须和这里的 https 根地址一致，不要带路径。
+example.invalid {
+	reverse_proxy 127.0.0.1:8787
+}

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>CFBundleDisplayName</key>
+	<string>小moto安全驾驶指南</string>
+	<key>CFBundleName</key>
+	<string>小moto安全驾驶指南</string>
+	<key>AMapWebKey</key>
+	<string>$(AMAP_WEB_KEY)</string>
+	<key>CommunityAPIBaseURL</key>
+	<string>$(COMMUNITY_API_BASE_URL)</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>audio</string>
+	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>小moto安全驾驶指南用你的位置在地图上标出当前位置，并计算和已记录的禁摩收费站、禁摩路段、抓拍点之间的距离。</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>小moto安全驾驶指南在骑行时即使锁屏或切换到其他 App，也需要持续定位，以便在约 2 公里和 500 米处发出语音和通知。定位只在本机用来判断距离，不会上传行驶轨迹。</string>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+	</dict>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+</dict>
+</plist>

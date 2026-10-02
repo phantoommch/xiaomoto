@@ -1,0 +1,12 @@
+// 签名团队留空。在 Secrets.xcconfig 里写 DEVELOPMENT_TEAM = <你的 Team ID>，或在命令行传 DEVELOPMENT_TEAM=。
+// 换签名团队只改下面这一行。Secrets.xcconfig 里如果也写了 DEVELOPMENT_TEAM，会覆盖这里。
+DEVELOPMENT_TEAM =
+
+IPHONEOS_DEPLOYMENT_TARGET = 17.0
+SWIFT_VERSION = 5.0
+TARGETED_DEVICE_FAMILY = 1,2
+
+// 真正的 Key 放在同目录的 Secrets.xcconfig（已被 git 忽略）。
+AMAP_WEB_KEY =
+// 社区服务器根地址。部署前留空。设置页里的非空地址优先于这里。
+COMMUNITY_API_BASE_URL =

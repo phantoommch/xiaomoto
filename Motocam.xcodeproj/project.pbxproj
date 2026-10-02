@@ -1,0 +1,648 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A77D0E11C4B29F8031E6AA02 /* AppUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77D0E11C4B29F8031E6AA01 /* AppUpdate.swift */; };
+		A77D0E11C4B29F8031E6AA04 /* AppUpdateLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77D0E11C4B29F8031E6AA03 /* AppUpdateLink.swift */; };
+		A77D0E11C4B29F8031E6BB02 /* SyncNotice.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77D0E11C4B29F8031E6BB01 /* SyncNotice.swift */; };
+		A77D0E11C4B29F8031E6BB04 /* SyncNoticeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77D0E11C4B29F8031E6BB03 /* SyncNoticeTests.swift */; };
+		EF769E5F69426F44A6856F12 /* AmapClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F8597BDB942C8BA170C6360 /* AmapClient.swift */; };
+		F818B43EA06D0565E400C078 /* CommunityClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9BF198D331FEDC620A9566 /* CommunityClient.swift */; };
+		8D161AA5E2AA5B3144CC245D /* ImageRedactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD7FEF94714D9FB67F9837B5 /* ImageRedactor.swift */; };
+		BF9DBBA8F0DE5E17F6365DF6 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EECB734D9FDC49541C27F1E /* KeychainStore.swift */; };
+		784F8A4C2A3584EDBB50E60B /* MotocamApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D204C9738A13D7A5D30F93E3 /* MotocamApp.swift */; };
+		2CEA5C31BC271981FC50E8E3 /* PointStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49314F8A60A14122B4C93F80 /* PointStore.swift */; };
+		08E796F671AD1252D2288F96 /* RideController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C51938B6D4CA21D41EEBEC5D /* RideController.swift */; };
+		7EA9F80328C970C837C1508B /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B345B5597E82DC28BC91A44 /* SettingsStore.swift */; };
+		EBEBF8B4E0AFB25A1005A5C3 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54BC44EC7D0C8A04E39BAA3E /* Theme.swift */; };
+		F2EB75CDE712EEB0AE6FD180 /* TicketOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC0020D0436AD5D7BF0C502 /* TicketOCR.swift */; };
+		A37F50DECB9ED7AF2ABF7F9E /* AlertEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3A26AA058796A2983CC4A2 /* AlertEngine.swift */; };
+		A71FA40704CE2B82DC48206A /* AmapRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2059478A19AF3AC4C4EAE8AE /* AmapRequest.swift */; };
+		21B200C8396EC132C9328908 /* AppIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = BADD601140E4AB53D6710B72 /* AppIdentity.swift */; };
+		59494FDED884D9A57DBCEAFA /* CoordinateConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1EE290EEFFAB83ADF4AA4B /* CoordinateConverter.swift */; };
+		957AC305CD4AB8B8F6ABBC79 /* GeoMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100151D8AB8AD6726D3E0496 /* GeoMath.swift */; };
+		A72B397CAF9AAD1381E3AF6A /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DDE54A140F7C92E1BA1458 /* Models.swift */; };
+		C3106D872FDCED051B822E4F /* PlaceRanker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB23E4196182FD4E1F02D04A /* PlaceRanker.swift */; };
+		D2240584A8D0A5074BFA21EE /* PointCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB1C6C6AA0CD422733A5B9CB /* PointCodec.swift */; };
+		959A5948B5C0D306865FCF09 /* QueryCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6AD427672BF50B009EE0D05 /* QueryCleaner.swift */; };
+		09C1808CDB6E95E521F40220 /* TextNormalize.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF4BFE004C5791647C00BD0 /* TextNormalize.swift */; };
+		15E57FE10D2622823F109D4A /* TicketParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B2EE537DE97E2ED2BFBC72C /* TicketParser.swift */; };
+		R31A00000000000000000002 /* Recog.swift in Sources */ = {isa = PBXBuildFile; fileRef = R31A00000000000000000001 /* Recog.swift */; };
+		A4F69F7EBDC771F0A98E0427 /* BlurEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADE28FA19AF9B733F1334C2D /* BlurEditorView.swift */; };
+		30C61CCA442AC2D21B12771F /* CommunityUploadSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E1BD70B5D437B369BED5DC /* CommunityUploadSheet.swift */; };
+		B207AF13A612C1EF61F1047A /* MapHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE2288FE0603BAD8A9E9D32 /* MapHomeView.swift */; };
+		26653B1A178ADD251DFF94EE /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A12E09CD00F94225B8D0C8F /* OnboardingView.swift */; };
+		F38867E19743A61857CFFFDC /* PointDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF4829CB8C2DC422A649A70 /* PointDetailSheet.swift */; };
+		B9B0EF64ADBFB3DCFD5E3D51 /* PointEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8641513189BDA99F9955522 /* PointEditorSheet.swift */; };
+		14B08626CDD52F1B9B23075C /* RideDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C1164A3BA6CEA90AEC50E1 /* RideDashboardView.swift */; };
+		8039D19E074E045B5E098E40 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE8E3652945175C7352D040 /* RootTabView.swift */; };
+		1C61F289AA092F48D9BF2EC5 /* SearchSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3BEF41862D18E5686F831D0 /* SearchSheet.swift */; };
+		3FAD55FA7CC333379E74B2D2 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DE9E79FB7607ECE9B141A6 /* SettingsView.swift */; };
+		A1C749FE760D7A73D74F5B35 /* TicketImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 693859DC2D403894085118C6 /* TicketImportView.swift */; };
+		4A4D6C745AEC0A201D7F31D6 /* AlertEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF08374C920436D2FA3D789A /* AlertEngineTests.swift */; };
+		A77D0E11C4B29F8031E6AA06 /* AppUpdateLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77D0E11C4B29F8031E6AA05 /* AppUpdateLinkTests.swift */; };
+		2F2C04AD8D9D722E1F4F3817 /* CoordinateConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5CD2DE12648295BCF4A28B7 /* CoordinateConverterTests.swift */; };
+		9CB57AB33F49F97CBD9F7836 /* PointCodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91D1731D672714D4ACB56F2F /* PointCodecTests.swift */; };
+		86429FBFAB8FC2DE7D810F4E /* QueryRankingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38FEEFC55400CEE5191F6DDF /* QueryRankingTests.swift */; };
+		DE6D4AA6BFF9FF6F94F164D8 /* TestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81D28B7E3B0BD6935858C80B /* TestSupport.swift */; };
+		AF712EC76C431D328B412648 /* TicketParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 552A892677563722BABB33CF /* TicketParserTests.swift */; };
+		F9F6BAD684FB5D89FDA4F1A6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 59CC88426B3C10E817D5C3D7 /* Assets.xcassets */; };
+		DB8425D89EF1BB089F320938 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C0BE9BCBE931884DCE10B748 /* PrivacyInfo.xcprivacy */; };
+		A30000000000000000000102 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30000000000000000000101 /* LoginView.swift */; };
+		A30000000000000000000104 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30000000000000000000103 /* SessionStore.swift */; };
+		A30000000000000000000106 /* terms.md in Resources */ = {isa = PBXBuildFile; fileRef = A30000000000000000000105 /* terms.md */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		78AF9CBC92B2B17C537164D6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FAD9EEEC0EF94D3421863A7E;
+			remoteInfo = Motocam;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		9F8597BDB942C8BA170C6360 /* AmapClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmapClient.swift; sourceTree = "<group>"; };
+		A77D0E11C4B29F8031E6AA01 /* AppUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdate.swift; sourceTree = "<group>"; };
+		A77D0E11C4B29F8031E6AA03 /* AppUpdateLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateLink.swift; sourceTree = "<group>"; };
+		A77D0E11C4B29F8031E6BB01 /* SyncNotice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncNotice.swift; sourceTree = "<group>"; };
+		A77D0E11C4B29F8031E6BB03 /* SyncNoticeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncNoticeTests.swift; sourceTree = "<group>"; };
+		DA9BF198D331FEDC620A9566 /* CommunityClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityClient.swift; sourceTree = "<group>"; };
+		AD7FEF94714D9FB67F9837B5 /* ImageRedactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageRedactor.swift; sourceTree = "<group>"; };
+		4EECB734D9FDC49541C27F1E /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		D204C9738A13D7A5D30F93E3 /* MotocamApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotocamApp.swift; sourceTree = "<group>"; };
+		49314F8A60A14122B4C93F80 /* PointStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointStore.swift; sourceTree = "<group>"; };
+		C51938B6D4CA21D41EEBEC5D /* RideController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RideController.swift; sourceTree = "<group>"; };
+		9B345B5597E82DC28BC91A44 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		54BC44EC7D0C8A04E39BAA3E /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		EFC0020D0436AD5D7BF0C502 /* TicketOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketOCR.swift; sourceTree = "<group>"; };
+		1A3A26AA058796A2983CC4A2 /* AlertEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertEngine.swift; sourceTree = "<group>"; };
+		2059478A19AF3AC4C4EAE8AE /* AmapRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmapRequest.swift; sourceTree = "<group>"; };
+		BADD601140E4AB53D6710B72 /* AppIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIdentity.swift; sourceTree = "<group>"; };
+		AA1EE290EEFFAB83ADF4AA4B /* CoordinateConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateConverter.swift; sourceTree = "<group>"; };
+		100151D8AB8AD6726D3E0496 /* GeoMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoMath.swift; sourceTree = "<group>"; };
+		A5DDE54A140F7C92E1BA1458 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		BB23E4196182FD4E1F02D04A /* PlaceRanker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceRanker.swift; sourceTree = "<group>"; };
+		EB1C6C6AA0CD422733A5B9CB /* PointCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCodec.swift; sourceTree = "<group>"; };
+		D6AD427672BF50B009EE0D05 /* QueryCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryCleaner.swift; sourceTree = "<group>"; };
+		AEF4BFE004C5791647C00BD0 /* TextNormalize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNormalize.swift; sourceTree = "<group>"; };
+		3B2EE537DE97E2ED2BFBC72C /* TicketParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketParser.swift; sourceTree = "<group>"; };
+		R31A00000000000000000001 /* Recog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recog.swift; sourceTree = "<group>"; };
+		ADE28FA19AF9B733F1334C2D /* BlurEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurEditorView.swift; sourceTree = "<group>"; };
+		D4E1BD70B5D437B369BED5DC /* CommunityUploadSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityUploadSheet.swift; sourceTree = "<group>"; };
+		2CE2288FE0603BAD8A9E9D32 /* MapHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapHomeView.swift; sourceTree = "<group>"; };
+		0A12E09CD00F94225B8D0C8F /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		9FF4829CB8C2DC422A649A70 /* PointDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointDetailSheet.swift; sourceTree = "<group>"; };
+		F8641513189BDA99F9955522 /* PointEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointEditorSheet.swift; sourceTree = "<group>"; };
+		B0C1164A3BA6CEA90AEC50E1 /* RideDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RideDashboardView.swift; sourceTree = "<group>"; };
+		DBE8E3652945175C7352D040 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
+		C3BEF41862D18E5686F831D0 /* SearchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSheet.swift; sourceTree = "<group>"; };
+		C9DE9E79FB7607ECE9B141A6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		693859DC2D403894085118C6 /* TicketImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketImportView.swift; sourceTree = "<group>"; };
+		FF08374C920436D2FA3D789A /* AlertEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertEngineTests.swift; sourceTree = "<group>"; };
+		A77D0E11C4B29F8031E6AA05 /* AppUpdateLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateLinkTests.swift; sourceTree = "<group>"; };
+		A5CD2DE12648295BCF4A28B7 /* CoordinateConverterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateConverterTests.swift; sourceTree = "<group>"; };
+		91D1731D672714D4ACB56F2F /* PointCodecTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCodecTests.swift; sourceTree = "<group>"; };
+		38FEEFC55400CEE5191F6DDF /* QueryRankingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryRankingTests.swift; sourceTree = "<group>"; };
+		81D28B7E3B0BD6935858C80B /* TestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSupport.swift; sourceTree = "<group>"; };
+		552A892677563722BABB33CF /* TicketParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketParserTests.swift; sourceTree = "<group>"; };
+		75DF358838D7C9029D83F5A2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A26B26E1C0DE5A17E0000001 /* Motocam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Motocam.entitlements; sourceTree = "<group>"; };
+		0D28899041F7BA5AE93D4F23 /* ticket_chishi.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ticket_chishi.txt; sourceTree = "<group>"; };
+		C78C5B18D7576691B6C910C2 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		B80D04D542DD80243BB8EF23 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		FBBEF4C78CF48650F02E7541 /* Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Shared.xcconfig; sourceTree = "<group>"; };
+		1334D9583DC6B51C113C006E /* Secrets.example.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.example.xcconfig; sourceTree = "<group>"; };
+		59CC88426B3C10E817D5C3D7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C0BE9BCBE931884DCE10B748 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A30000000000000000000101 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		A30000000000000000000103 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		A30000000000000000000105 /* terms.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = terms.md; sourceTree = "<group>"; };
+		38871AFD143805C9CCE6A735 /* Motocam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Motocam.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DF1B9B028C15E8638F398007 /* MotocamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MotocamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2D3446C63F9EEB9172CAE05B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CC40A40B1A5630AD4E7C4B11 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1C48CE29E4E135EE62951B22 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				9F8597BDB942C8BA170C6360 /* AmapClient.swift */,
+				A77D0E11C4B29F8031E6AA01 /* AppUpdate.swift */,
+				DA9BF198D331FEDC620A9566 /* CommunityClient.swift */,
+				AD7FEF94714D9FB67F9837B5 /* ImageRedactor.swift */,
+				4EECB734D9FDC49541C27F1E /* KeychainStore.swift */,
+				D204C9738A13D7A5D30F93E3 /* MotocamApp.swift */,
+				49314F8A60A14122B4C93F80 /* PointStore.swift */,
+				C51938B6D4CA21D41EEBEC5D /* RideController.swift */,
+				9B345B5597E82DC28BC91A44 /* SettingsStore.swift */,
+				A30000000000000000000103 /* SessionStore.swift */,
+				54BC44EC7D0C8A04E39BAA3E /* Theme.swift */,
+				EFC0020D0436AD5D7BF0C502 /* TicketOCR.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		410188F9DC6E499FEC68BCF6 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				1A3A26AA058796A2983CC4A2 /* AlertEngine.swift */,
+				A77D0E11C4B29F8031E6AA03 /* AppUpdateLink.swift */,
+				A77D0E11C4B29F8031E6BB01 /* SyncNotice.swift */,
+				2059478A19AF3AC4C4EAE8AE /* AmapRequest.swift */,
+				BADD601140E4AB53D6710B72 /* AppIdentity.swift */,
+				AA1EE290EEFFAB83ADF4AA4B /* CoordinateConverter.swift */,
+				100151D8AB8AD6726D3E0496 /* GeoMath.swift */,
+				A5DDE54A140F7C92E1BA1458 /* Models.swift */,
+				BB23E4196182FD4E1F02D04A /* PlaceRanker.swift */,
+				EB1C6C6AA0CD422733A5B9CB /* PointCodec.swift */,
+				D6AD427672BF50B009EE0D05 /* QueryCleaner.swift */,
+				AEF4BFE004C5791647C00BD0 /* TextNormalize.swift */,
+				3B2EE537DE97E2ED2BFBC72C /* TicketParser.swift */,
+				R31A00000000000000000001 /* Recog.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		58492F208780FA5EF3807E8F /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				ADE28FA19AF9B733F1334C2D /* BlurEditorView.swift */,
+				D4E1BD70B5D437B369BED5DC /* CommunityUploadSheet.swift */,
+				A30000000000000000000101 /* LoginView.swift */,
+				2CE2288FE0603BAD8A9E9D32 /* MapHomeView.swift */,
+				0A12E09CD00F94225B8D0C8F /* OnboardingView.swift */,
+				9FF4829CB8C2DC422A649A70 /* PointDetailSheet.swift */,
+				F8641513189BDA99F9955522 /* PointEditorSheet.swift */,
+				B0C1164A3BA6CEA90AEC50E1 /* RideDashboardView.swift */,
+				DBE8E3652945175C7352D040 /* RootTabView.swift */,
+				C3BEF41862D18E5686F831D0 /* SearchSheet.swift */,
+				C9DE9E79FB7607ECE9B141A6 /* SettingsView.swift */,
+				693859DC2D403894085118C6 /* TicketImportView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A4B7708B3D2F36C3A2694F01 /* Motocam */ = {
+			isa = PBXGroup;
+			children = (
+				1C48CE29E4E135EE62951B22 /* App */,
+				410188F9DC6E499FEC68BCF6 /* Core */,
+				58492F208780FA5EF3807E8F /* Views */,
+				59CC88426B3C10E817D5C3D7 /* Assets.xcassets */,
+				A26B26E1C0DE5A17E0000001 /* Motocam.entitlements */,
+				75DF358838D7C9029D83F5A2 /* Info.plist */,
+				C0BE9BCBE931884DCE10B748 /* PrivacyInfo.xcprivacy */,
+				A30000000000000000000105 /* terms.md */,
+			);
+			path = Motocam;
+			sourceTree = "<group>";
+		};
+		C137DF86318D760661AFA694 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				0D28899041F7BA5AE93D4F23 /* ticket_chishi.txt */,
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
+		EEFE21A1443933CA4DE017DA /* MotocamTests */ = {
+			isa = PBXGroup;
+			children = (
+				FF08374C920436D2FA3D789A /* AlertEngineTests.swift */,
+				A77D0E11C4B29F8031E6AA05 /* AppUpdateLinkTests.swift */,
+				A77D0E11C4B29F8031E6BB03 /* SyncNoticeTests.swift */,
+				A5CD2DE12648295BCF4A28B7 /* CoordinateConverterTests.swift */,
+				91D1731D672714D4ACB56F2F /* PointCodecTests.swift */,
+				38FEEFC55400CEE5191F6DDF /* QueryRankingTests.swift */,
+				81D28B7E3B0BD6935858C80B /* TestSupport.swift */,
+				552A892677563722BABB33CF /* TicketParserTests.swift */,
+				C137DF86318D760661AFA694 /* Fixtures */,
+			);
+			path = MotocamTests;
+			sourceTree = "<group>";
+		};
+		D35BDCF6803CCB1A9C4483A8 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				C78C5B18D7576691B6C910C2 /* Debug.xcconfig */,
+				B80D04D542DD80243BB8EF23 /* Release.xcconfig */,
+				FBBEF4C78CF48650F02E7541 /* Shared.xcconfig */,
+				1334D9583DC6B51C113C006E /* Secrets.example.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		00C45FD35CB0F9C5F764F070 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				38871AFD143805C9CCE6A735 /* Motocam.app */,
+				DF1B9B028C15E8638F398007 /* MotocamTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		ADCF10F76EBF2A74473E9DC4 = {
+			isa = PBXGroup;
+			children = (
+				D35BDCF6803CCB1A9C4483A8 /* Config */,
+				A4B7708B3D2F36C3A2694F01 /* Motocam */,
+				EEFE21A1443933CA4DE017DA /* MotocamTests */,
+				00C45FD35CB0F9C5F764F070 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FAD9EEEC0EF94D3421863A7E /* Motocam */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 32995943DE67267A65D32CA9 /* Build configuration list for PBXNativeTarget "Motocam" */;
+			buildPhases = (
+				507A349611DBB42F9CF9069B /* Sources */,
+				2D3446C63F9EEB9172CAE05B /* Frameworks */,
+				4C29BBC16528FEA9E858725B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Motocam;
+			productName = Motocam;
+			productReference = 38871AFD143805C9CCE6A735 /* Motocam.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F58B7DBCC1567F9985E4A1B0 /* MotocamTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F722E0DC847BA009AE0DBB50 /* Build configuration list for PBXNativeTarget "MotocamTests" */;
+			buildPhases = (
+				283236DFCBED01B817B33E02 /* Sources */,
+				CC40A40B1A5630AD4E7C4B11 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				15361775C351088D27E4B786 /* PBXTargetDependency */,
+			);
+			name = MotocamTests;
+			productName = MotocamTests;
+			productReference = DF1B9B028C15E8638F398007 /* MotocamTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		98F54143AB4E86B28C3AFEE0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					FAD9EEEC0EF94D3421863A7E = {
+						CreatedOnToolsVersion = 15.0;
+						ProvisioningStyle = Automatic;
+					};
+					F58B7DBCC1567F9985E4A1B0 = {
+						CreatedOnToolsVersion = 15.0;
+						ProvisioningStyle = Automatic;
+						TestTargetID = FAD9EEEC0EF94D3421863A7E;
+					};
+				};
+			};
+			buildConfigurationList = 12D04D787E90C9B967248BFD /* Build configuration list for PBXProject "Motocam" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = zh-Hans;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				"zh-Hans",
+				Base,
+			);
+			mainGroup = ADCF10F76EBF2A74473E9DC4;
+			productRefGroup = 00C45FD35CB0F9C5F764F070 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FAD9EEEC0EF94D3421863A7E /* Motocam */,
+				F58B7DBCC1567F9985E4A1B0 /* MotocamTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4C29BBC16528FEA9E858725B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9F6BAD684FB5D89FDA4F1A6 /* Assets.xcassets in Resources */,
+				DB8425D89EF1BB089F320938 /* PrivacyInfo.xcprivacy in Resources */,
+				A30000000000000000000106 /* terms.md in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		507A349611DBB42F9CF9069B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EF769E5F69426F44A6856F12 /* AmapClient.swift in Sources */,
+				A77D0E11C4B29F8031E6AA02 /* AppUpdate.swift in Sources */,
+				F818B43EA06D0565E400C078 /* CommunityClient.swift in Sources */,
+				8D161AA5E2AA5B3144CC245D /* ImageRedactor.swift in Sources */,
+				BF9DBBA8F0DE5E17F6365DF6 /* KeychainStore.swift in Sources */,
+				784F8A4C2A3584EDBB50E60B /* MotocamApp.swift in Sources */,
+				2CEA5C31BC271981FC50E8E3 /* PointStore.swift in Sources */,
+				08E796F671AD1252D2288F96 /* RideController.swift in Sources */,
+				7EA9F80328C970C837C1508B /* SettingsStore.swift in Sources */,
+				EBEBF8B4E0AFB25A1005A5C3 /* Theme.swift in Sources */,
+				F2EB75CDE712EEB0AE6FD180 /* TicketOCR.swift in Sources */,
+				A37F50DECB9ED7AF2ABF7F9E /* AlertEngine.swift in Sources */,
+				A77D0E11C4B29F8031E6AA04 /* AppUpdateLink.swift in Sources */,
+				A77D0E11C4B29F8031E6BB02 /* SyncNotice.swift in Sources */,
+				A71FA40704CE2B82DC48206A /* AmapRequest.swift in Sources */,
+				21B200C8396EC132C9328908 /* AppIdentity.swift in Sources */,
+				59494FDED884D9A57DBCEAFA /* CoordinateConverter.swift in Sources */,
+				957AC305CD4AB8B8F6ABBC79 /* GeoMath.swift in Sources */,
+				A72B397CAF9AAD1381E3AF6A /* Models.swift in Sources */,
+				C3106D872FDCED051B822E4F /* PlaceRanker.swift in Sources */,
+				D2240584A8D0A5074BFA21EE /* PointCodec.swift in Sources */,
+				959A5948B5C0D306865FCF09 /* QueryCleaner.swift in Sources */,
+				09C1808CDB6E95E521F40220 /* TextNormalize.swift in Sources */,
+				15E57FE10D2622823F109D4A /* TicketParser.swift in Sources */,
+				R31A00000000000000000002 /* Recog.swift in Sources */,
+				A4F69F7EBDC771F0A98E0427 /* BlurEditorView.swift in Sources */,
+				30C61CCA442AC2D21B12771F /* CommunityUploadSheet.swift in Sources */,
+				B207AF13A612C1EF61F1047A /* MapHomeView.swift in Sources */,
+				26653B1A178ADD251DFF94EE /* OnboardingView.swift in Sources */,
+				F38867E19743A61857CFFFDC /* PointDetailSheet.swift in Sources */,
+				B9B0EF64ADBFB3DCFD5E3D51 /* PointEditorSheet.swift in Sources */,
+				14B08626CDD52F1B9B23075C /* RideDashboardView.swift in Sources */,
+				8039D19E074E045B5E098E40 /* RootTabView.swift in Sources */,
+				1C61F289AA092F48D9BF2EC5 /* SearchSheet.swift in Sources */,
+				3FAD55FA7CC333379E74B2D2 /* SettingsView.swift in Sources */,
+				A30000000000000000000102 /* LoginView.swift in Sources */,
+				A30000000000000000000104 /* SessionStore.swift in Sources */,
+				A1C749FE760D7A73D74F5B35 /* TicketImportView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		283236DFCBED01B817B33E02 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A4D6C745AEC0A201D7F31D6 /* AlertEngineTests.swift in Sources */,
+				A77D0E11C4B29F8031E6AA06 /* AppUpdateLinkTests.swift in Sources */,
+				A77D0E11C4B29F8031E6BB04 /* SyncNoticeTests.swift in Sources */,
+				2F2C04AD8D9D722E1F4F3817 /* CoordinateConverterTests.swift in Sources */,
+				9CB57AB33F49F97CBD9F7836 /* PointCodecTests.swift in Sources */,
+				86429FBFAB8FC2DE7D810F4E /* QueryRankingTests.swift in Sources */,
+				DE6D4AA6BFF9FF6F94F164D8 /* TestSupport.swift in Sources */,
+				AF712EC76C431D328B412648 /* TicketParserTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		15361775C351088D27E4B786 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FAD9EEEC0EF94D3421863A7E /* Motocam */;
+			targetProxy = 78AF9CBC92B2B17C537164D6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		877A6BA951A2EA0025A2ABE8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C78C5B18D7576691B6C910C2 /* Debug.xcconfig */;
+			buildSettings = {
+
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		959134B361DD7E21ADEA3164 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B80D04D542DD80243BB8EF23 /* Release.xcconfig */;
+			buildSettings = {
+
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+
+				ENABLE_NS_ASSERTIONS = NO;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		3CF6A4F2E05B3AAE7E2CBFEE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C78C5B18D7576691B6C910C2 /* Debug.xcconfig */;
+			buildSettings = {
+
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Motocam/Motocam.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 33;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Motocam/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				INFOPLIST_KEY_CFBundleDisplayName = "小moto安全驾驶指南";
+				INFOPLIST_KEY_CFBundleName = "小moto安全驾驶指南";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.xiaomoto;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+
+			};
+			name = Debug;
+		};
+		23FB2CAEB38545C3793097DD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B80D04D542DD80243BB8EF23 /* Release.xcconfig */;
+			buildSettings = {
+
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Motocam/Motocam.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 33;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Motocam/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				INFOPLIST_KEY_CFBundleDisplayName = "小moto安全驾驶指南";
+				INFOPLIST_KEY_CFBundleName = "小moto安全驾驶指南";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.xiaomoto;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+
+			};
+			name = Release;
+		};
+		B41A663912C5AD2A1D96567A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C78C5B18D7576691B6C910C2 /* Debug.xcconfig */;
+			buildSettings = {
+
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 33;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.xiaomoto.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Motocam.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Motocam";
+
+			};
+			name = Debug;
+		};
+		116C7F1B65D647B9F0FAA412 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B80D04D542DD80243BB8EF23 /* Release.xcconfig */;
+			buildSettings = {
+
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 33;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.xiaomoto.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Motocam.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Motocam";
+
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		12D04D787E90C9B967248BFD /* Build configuration list for PBXProject "Motocam" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				877A6BA951A2EA0025A2ABE8 /* Debug */,
+				959134B361DD7E21ADEA3164 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		32995943DE67267A65D32CA9 /* Build configuration list for PBXNativeTarget "Motocam" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3CF6A4F2E05B3AAE7E2CBFEE /* Debug */,
+				23FB2CAEB38545C3793097DD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F722E0DC847BA009AE0DBB50 /* Build configuration list for PBXNativeTarget "MotocamTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B41A663912C5AD2A1D96567A /* Debug */,
+				116C7F1B65D647B9F0FAA412 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+}

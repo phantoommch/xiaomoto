@@ -1,0 +1,14 @@
+[Unit]
+Description=小moto社区与安装包
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/xiaomoto-app
+EnvironmentFile=/opt/xiaomoto-app/server.env
+ExecStart=/opt/xiaomoto-app/motocam
+Restart=on-failure
+User=xiaomoto
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

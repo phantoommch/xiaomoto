@@ -1,0 +1,39 @@
+services:
+  motocam:
+    build: ./server
+    ports:
+      - "8787:8787"
+    environment:
+      ADDR: ":8787"
+      DATA_DIR: /data
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-}
+      PROMOTE_MIN_REPORTS: ${PROMOTE_MIN_REPORTS:-1}
+      PROMOTE_RADIUS_M: ${PROMOTE_RADIUS_M:-200}
+      RATE_PER_HOUR: ${RATE_PER_HOUR:-200}
+      RATE_PER_DAY: ${RATE_PER_DAY:-1000}
+      MAX_IMAGE_BYTES: ${MAX_IMAGE_BYTES:-5242880}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_TLS: ${SMTP_TLS:-}
+      AUTH_DEV: ${AUTH_DEV:-}
+      REVIEW_EMAIL: ${REVIEW_EMAIL:-}
+      REVIEW_CODE: ${REVIEW_CODE:-}
+      TERMS_VERSION: ${TERMS_VERSION:-}
+      AMAP_KEY: ${AMAP_KEY:-}
+      CONTACT_EMAIL: ${CONTACT_EMAIL:-}
+    volumes:
+      - motocam-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/motocam", "-healthcheck"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  motocam-data:
