@@ -94,7 +94,7 @@ xcrun devicectl device install app --device <udid> \
   "$HOME/Library/Developer/Xcode/DerivedData/Motocam/Build/Products/Debug-iphoneos/Motocam.app"
 ```
 
-也可以在 Xcode 里选这台 iPhone，直接 Run。签名是 Automatic，`DEVELOPMENT_TEAM` 来自 `Config/Shared.xcconfig`（命令行上的同名参数会盖掉它）。工程没有单独的 entitlements 文件：后台定位和语音只写在 `Info.plist` 的 `UIBackgroundModes`，没有推送、Associated Domains 这类要付费团队的能力。选罚单截图用的是系统 PhotosPicker，不申请整个相册权限，所以没有 `NSPhotoLibraryUsageDescription`。
+也可以在 Xcode 里选这台 iPhone，直接 Run。签名是 Automatic，`DEVELOPMENT_TEAM` 来自 `Config/Shared.xcconfig`（命令行上的同名参数会盖掉它）。`Motocam/Motocam.entitlements` 只声明时效性通知。`Info.plist` 的 `UIBackgroundModes` 只有 `location`，不要再加 `audio`（App Store Guideline 2.5.4）。骑行语音仍用 `AVSpeechSynthesizer`，但只在 App 处于前台或被定位唤醒时尝试朗读；锁屏后的提醒靠通知和振动。没有推送、Associated Domains 这类要付费团队的能力。选罚单截图用的是系统 PhotosPicker，不申请整个相册权限，所以没有 `NSPhotoLibraryUsageDescription`。
 
 要导出 ad-hoc 安装包时，先把 `ExportOptions.plist` 里的 `teamID` 换成你自己的 Team ID（仓库里是占位符 `YOUR_APPLE_TEAM_ID`）。某些 Xcode beta 在 Release 归档时编译器会崩溃，可以改用 Debug 归档再导出：
 
@@ -139,7 +139,7 @@ DEVELOPMENT_TEAM = YOUR_APPLE_TEAM_ID
 
 ### 后台定位要怎么授权
 
-骑行提醒需要「始终」定位。`Info.plist` 的 `UIBackgroundModes` 有 `location` 和 `audio`：锁屏后继续算距离，语音只在一条提醒播出时打开音频会话，念完就关掉。系统弹出的说明就是这两段：
+骑行提醒需要「始终」定位。`Info.plist` 的 `UIBackgroundModes` 只有 `location`：锁屏后继续算距离。语音不声明 `audio` 后台模式，只在 App 处于前台或被定位唤醒时打开音频会话，念完就关掉；锁屏后的提醒靠通知和振动。系统弹出的说明就是这两段：
 
 - 使用期间：小moto安全驾驶指南用你的位置在地图上标出当前位置，并计算和已记录的禁摩收费站、禁摩路段、抓拍点之间的距离。
 - 始终：小moto安全驾驶指南在骑行时即使锁屏或切换到其他 App，也需要持续定位，以便在约 2 公里和 500 米处发出语音和通知。定位只在本机用来判断距离，不会上传行驶轨迹。
