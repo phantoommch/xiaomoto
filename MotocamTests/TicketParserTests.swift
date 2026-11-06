@@ -114,6 +114,13 @@ final class TicketParserTests: XCTestCase {
         XCTAssertFalse(ticket.location?.hasSuffix("15") == true)
     }
 
+    func testSubmissionStatusUsesApprovedWording() {
+        XCTAssertEqual(SubmissionStatus.label("merged"), "已通过")
+        XCTAssertEqual(SubmissionStatus.label("approved"), "已通过")
+        XCTAssertEqual(SubmissionStatus.label("rejected"), "已驳回")
+        XCTAssertEqual(SubmissionStatus.label("pending"), "审核中")
+    }
+
     func testMissingLocationStaysNil() {
         let ticket = TicketParser.parse("违法行为：超速\n罚款200元")
         XCTAssertTrue(ticket.records.isEmpty)

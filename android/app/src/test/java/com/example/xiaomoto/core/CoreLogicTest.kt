@@ -537,6 +537,10 @@ class TicketParserTest {
         assertTrue(merged.contains("K15+350"))
         assertTrue(merged.contains("9公里810米"))
         assertNull(Recog.locate("违法处理\n返回\n加入处理清单\n处理并缴款", "违法处理\n返回\n加入处理清单\n处理并缴款", "unused"))
+        assertEquals("已通过", SubmissionStatus.label("merged"))
+        assertEquals("已通过", SubmissionStatus.label("approved"))
+        assertEquals("已驳回", SubmissionStatus.label("rejected"))
+        assertEquals("审核中", SubmissionStatus.label("pending"))
     }
 }
 

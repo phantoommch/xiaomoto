@@ -262,6 +262,18 @@ enum TicketParser {
     }
 }
 
+/// Words the uploader sees for a community report. merged is the published status.
+enum SubmissionStatus {
+    static func label(_ status: String) -> String {
+        switch status {
+        case "merged", "approved": return "已通过"
+        case "rejected": return "已驳回"
+        case "archived": return "已归档"
+        default: return "审核中"
+        }
+    }
+}
+
 /// Picks stake lines out of a second, magnified OCR pass without dropping the form text.
 enum OCRText {
     private static let stake = try? NSRegularExpression(pattern: "(?i)K\\d{1,4}\\s*\\+\\s*\\d{1,4}|\\d{1,4}\\s*(?:公里|千米|KM)")

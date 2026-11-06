@@ -249,6 +249,16 @@ object TicketParser {
     }
 }
 
+/** Words the uploader sees for a community report. merged is the published status. */
+object SubmissionStatus {
+    fun label(status: String): String = when (status) {
+        "merged", "approved" -> "已通过"
+        "rejected" -> "已驳回"
+        "archived" -> "已归档"
+        else -> "审核中"
+    }
+}
+
 /** Picks stake lines out of a second, magnified OCR pass without dropping the form text. */
 object OCRText {
     private val stake = Regex("""(?i)K\d{1,4}\s*\+\s*\d{1,4}|\d{1,4}\s*(?:公里|千米|KM)""")

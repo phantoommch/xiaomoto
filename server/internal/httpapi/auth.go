@@ -137,6 +137,19 @@ func (s *Server) me(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (s *Server) myReports(w http.ResponseWriter, r *http.Request) {
+	user, ok := s.requireUser(w, r)
+	if !ok {
+		return
+	}
+	reports, err := s.db.ListMine(user.ID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "读取失败")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"reports": reports})
+}
+
 func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
 	token := bearerToken(r)
 	if token == "" {
