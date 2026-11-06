@@ -77,7 +77,10 @@ enum Recog {
         "杭长": "G6021", "杭金衢": "G60", "申嘉湖": "S12", "苏锡常南部": "S58", "沪常": "S58", "广河": "S2",
         "成宜昭": "S4", "威砚": "S11", "枣木": "S83", "岚菏": "S38", "芜合": "G5011", "南芜": "G4211",
         "沪武": "G4221", "淮徐": "G2513", "甬舟": "G9211", "渝黔": "G75", "渝湘": "G65", "合安": "G3",
+        // Signed Yunnan S34, 曲靖三宝–昆明清水. Marker hits must come back in Yunnan.
+        "三清": "S34",
     ]
+    private static let nameProvince = ["三清": "云南"]
     private static let provinces = ["北京","天津","上海","重庆","河北","山西","辽宁","吉林","黑龙江","江苏","浙江","安徽","福建","江西","山东","河南","湖北","湖南","广东","海南","四川","贵州","云南","陕西","甘肃","青海","台湾","内蒙古","广西","西藏","宁夏","新疆","香港","澳门"]
     private static let adcode = ["11":"北京","12":"天津","13":"河北","14":"山西","15":"内蒙古","21":"辽宁","22":"吉林","23":"黑龙江","31":"上海","32":"江苏","33":"浙江","34":"安徽","35":"福建","36":"江西","37":"山东","41":"河南","42":"湖北","43":"湖南","44":"广东","45":"广西","46":"海南","50":"重庆","51":"四川","52":"贵州","53":"云南","54":"西藏","61":"陕西","62":"甘肃","63":"青海","64":"宁夏","65":"新疆"]
 
@@ -127,11 +130,10 @@ enum Recog {
         var range = false
         if stakes.count >= 2 {
             let between = slice(t2, stakes[0].span.1, stakes[1].span.0)
-            if between.range(of: "\\s*(?:-|—|–|~|～|至|到|_)\\s*", options: .regularExpression) != nil || between.count < 12 { range = true }
+            if between.range(of: "\\s*(?:-|—|–|~|～|至|到|_|·|・|•)\\s*", options: .regularExpression) != nil || between.count < 12 { range = true }
         }
-        var direction: String?
         let tnr = t.replacingOccurrences(of: "[\\p{Han}]{2,6}?(?:高速公路|高速|快速路)", with: " ", options: .regularExpression)
-        if let m = first("([\\p{Han}]{1,6}?)方向", tnr) { direction = m[0] }
+        var direction: String? = uniqueJoin(all("([\\p{Han}]{1,6}?)方向", tnr).map { $0[0] })
         for w in ["上行", "下行", "A道", "B道"] where t.contains(w) {
             direction = [direction, w].compactMap { $0 }.joined(separator: " ")
         }
@@ -178,10 +180,13 @@ enum Recog {
         let o = normalize(overlay).isEmpty ? t : normalize(overlay)
         var fix: OverlayFix?
         var dir: String?
-        if let m = first("地点[:：]?\\s*([GS]\\d{1,4})?([\\p{Han}]{0,6})K(\\d{1,4})\\+(\\d{1,4})", o) {
+        if let m = first("地点[:：]?\\s*([GS]\\d{1,4})?([\\p{Han}]{0,12})K(\\d{1,4})\\+(\\d{1,4})", o) {
             fix = OverlayFix(code: m[1].isEmpty ? nil : m[1], name: m[2], km: Double(m[3]) ?? 0, metres: Int(m[4]) ?? 0)
         }
-        if let m = first("(?:通行|行驶)方向[:：]?\\s*(上行|下行)", o) { dir = m[1] }
+        var dirs: [String] = []
+        if let m = first("(?:通行|行驶)方向[:：]?\\s*(上行|下行)", o) { dirs.append(m[1]) }
+        if let m = first("K\\d{1,4}\\+\\d{1,4}\\s*(?:M|米)?\\s*([\\p{Han}]{1,8}方向)", o), !dirs.contains(m[1]) { dirs.append(m[1]) }
+        dir = dirs.isEmpty ? nil : dirs.joined(separator: " ")
         if let m = first("设备编号[:：]?\\s*(\\d{6})", o), let name = adcode[String(m[1].prefix(2))] { provs.append(("device", name)) }
         return RegionSignals(provinces: provs, plate: plate, overlay: fix, overlayDir: dir)
     }
@@ -197,9 +202,143 @@ enum Recog {
         }
     }
 
+    private static func uniqueJoin(_ items: [String]) -> String? {
+        var seen = Set<String>()
+        let out = items.filter { !$0.isEmpty && seen.insert($0).inserted }
+        return out.isEmpty ? nil : out.joined(separator: " ")
+    }
+
+    private static func roadCore(_ name: String) -> String {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        for suf in ["高速公路", "快速路", "高速"] where trimmed.hasSuffix(suf) && trimmed.count > suf.count {
+            return String(trimmed.dropLast(suf.count))
+        }
+        return trimmed
+    }
+
+    private static func absorb(_ p: TicketParse, _ sig: RegionSignals) -> TicketParse {
+        guard let ol = sig.overlay else { return p }
+        var out = p
+        if out.code == nil || out.code?.isEmpty == true {
+            let named = roadCore(ol.name)
+            let hit = (ol.code ?? "").isEmpty ? nameToCode(named, nil) : nil
+            out.code = (ol.code?.isEmpty == false ? ol.code : nil) ?? hit?.0
+            if (out.nameCanon ?? "").isEmpty, let hit {
+                out.nameCanon = hit.1
+                out.nameHow = hit.2
+            }
+            if (out.roadName ?? "").isEmpty, !named.isEmpty { out.roadName = named }
+        }
+        if out.stakes.isEmpty, ol.km > 0 || ol.metres > 0 {
+            out.stakes = [RoadStake(km: ol.km, metres: ol.metres)]
+        }
+        if let extra = sig.overlayDir, !extra.isEmpty, !(out.direction ?? "").contains(extra) {
+            out.direction = [out.direction, extra].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " ")
+        }
+        return out
+    }
+
+    private static let ticketLabels = ["申请陈述和申辩", "违法地点", "违法时间", "违法行为", "违法车辆", "号牌号码", "罚款金额", "记分", "罚款"]
+
+    private static func ticketLabel(_ line: String) -> String {
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        var best = ""
+        for label in ticketLabels where trimmed.hasPrefix(label) && label.count > best.count {
+            let rest = String(trimmed.dropFirst(label.count))
+            let sep = rest.isEmpty || rest.hasPrefix(":") || rest.hasPrefix("：") || rest.hasPrefix(" ") || rest.hasPrefix("\t")
+            let fine = (label == "罚款" || label == "记分" || label == "罚款金额") && rest.first?.isNumber == true
+            if sep || fine { best = label }
+        }
+        return best
+    }
+
+    private static func continuesLocation(_ line: String) -> Bool {
+        let s = line.trimmingCharacters(in: .whitespaces)
+        if s.isEmpty || !ticketLabel(s).isEmpty { return false }
+        return s.hasPrefix("公里") || s.hasPrefix("千米") || s.hasPrefix("米") || s.contains("公里") || s.contains("千米") || s.contains("高速") || s.contains("+")
+    }
+
+    private static func ticketLines(_ full: String) -> [String] {
+        full.replacingOccurrences(of: "\r\n", with: "\n").components(separatedBy: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+    }
+
+    private static func labeledLocation(_ full: String) -> String {
+        let lines = ticketLines(full)
+        for (i, line) in lines.enumerated() where ticketLabel(line) == "违法地点" {
+            var parts: [String] = []
+            var start = i
+            let inline = String(line.dropFirst("违法地点".count)).trimmingCharacters(in: CharacterSet(charactersIn: ":： \t"))
+            if !inline.isEmpty {
+                parts.append(inline)
+            } else if i + 1 < lines.count, ticketLabel(lines[i + 1]).isEmpty {
+                start = i + 1
+                parts.append(lines[start])
+            }
+            var j = start + 1
+            while j < lines.count, ticketLabel(lines[j]).isEmpty, continuesLocation(lines[j]) {
+                parts.append(lines[j])
+                j += 1
+            }
+            return parts.joined()
+        }
+        return ""
+    }
+
+    private static func stakeScore(_ s: String) -> Int {
+        let text = s.trimmingCharacters(in: .whitespacesAndNewlines)
+        if text.isEmpty { return 0 }
+        let p = parse(text)
+        var score = p.stakes.count * 10 + p.glued.count * 8
+        score += p.stakes.filter { $0.metres != nil }.count * 3
+        if p.range && p.stakes.count >= 2 { score += 5 }
+        if let code = p.code, !code.isEmpty { score += 1 }
+        return score
+    }
+
+    private static func richerBody(_ location: String, _ full: String) -> String {
+        let lines = ticketLines(full)
+        var cands = [location.trimmingCharacters(in: .whitespacesAndNewlines), labeledLocation(full)]
+        for (i, line) in lines.enumerated() {
+            cands.append(line)
+            if i + 1 < lines.count, ticketLabel(lines[i + 1]).isEmpty { cands.append(line + lines[i + 1]) }
+        }
+        var best = ""
+        var bestScore = -1
+        for cand in cands {
+            let text = cand.trimmingCharacters(in: .whitespacesAndNewlines)
+            if text.isEmpty { continue }
+            let sc = stakeScore(text)
+            if sc > bestScore || (sc == bestScore && sc > 0 && text.count < best.count) {
+                best = text
+                bestScore = sc
+            }
+        }
+        return best.isEmpty ? location.trimmingCharacters(in: .whitespacesAndNewlines) : best
+    }
+
+    private static let chromePhrases = [
+        "如对违法无异议", "无需申请陈述和申辩", "请直接处理", "申请陈述和申辩",
+        "加入处理清单", "处理并缴款", "处理清单是空的", "违法处理",
+        "违法车辆", "违法时间", "违法行为", "违法地点", "号牌号码", "罚款金额",
+        "返回", "记分", "罚款", "看地图", "驳回",
+    ]
+
+    private static func chromeOnly(_ s: String) -> Bool {
+        let t = normalize(s)
+        if t.isEmpty { return true }
+        if t.range(of: "[\\p{Han}]{2,6}?(?:高速公路|高速|快速路)|K\\d{1,4}\\s*\\+|\\d{1,4}\\s*(?:公里|千米|KM)|收费站|服务区|停车区|隧道|特大桥|大桥|枢纽|互通|[GS]\\d{1,4}", options: .regularExpression) != nil {
+            return false
+        }
+        var stripped = t
+        for w in chromePhrases { stripped = stripped.replacingOccurrences(of: w, with: "") }
+        stripped = stripped.replacingOccurrences(of: "[\\d\\s:：,，.。、·\\-—–~～_|/\\\\（）()]+", with: "", options: .regularExpression)
+        return stripped.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     static func locate(text: String, full: String, key: String) async -> LocatedPoint? {
-        let parsed = parse(text.isEmpty ? full : text)
+        let body = richerBody(text, full)
         let sig = signals(full.isEmpty ? text : full)
+        let parsed = absorb(parse(body.isEmpty ? (full.isEmpty ? text : full) : body), sig)
         let region = await regionWords(parsed, sig, full.isEmpty ? text : full, key)
         guard var hit = await locateParsed(parsed, sig, region, key), hit.latitude.isFinite else { return nil }
         hit.roadName = hit.roadName.isEmpty ? (parsed.nameCanon ?? parsed.roadName ?? "") : hit.roadName
@@ -219,7 +358,7 @@ enum Recog {
 
     private static func locateParsed(_ p: TicketParse, _ sig: RegionSignals, _ region: [String], _ key: String) async -> LocatedPoint? {
         let blank = LocatedPoint(latitude: .nan, longitude: .nan, endLatitude: nil, endLongitude: nil, method: "", how: "", address: "", confidence: "none", roadCode: p.code ?? "", roadName: p.nameCanon ?? "", stake: "", direction: p.direction ?? "", parsed: p)
-        if let ol = sig.overlay, let code = ol.code, !code.isEmpty, let sp = await stakePoint(key, code, ol.km, ol.metres, region) {
+        if let ol = sig.overlay, let code = ol.code, !code.isEmpty, !(p.range && p.stakes.count >= 2), let sp = await stakePoint(key, code, ol.km, ol.metres, region) {
             var hit = blank
             hit.latitude = sp.lat; hit.longitude = sp.lon; hit.method = "overlay-stake"; hit.how = sp.how; hit.address = sp.addr; hit.confidence = "high"; hit.roadCode = code; hit.stake = stakeLabel(ol.km, ol.metres)
             return hit
@@ -245,7 +384,7 @@ enum Recog {
         }
         if let code = p.code, !code.isEmpty, let firstStake = p.stakes.first {
             var sp = await stakePoint(key, code, firstStake.km, firstStake.metres, region)
-            if sp == nil && !region.isEmpty { sp = await stakePoint(key, code, firstStake.km, firstStake.metres, nil) }
+            if sp == nil && !region.isEmpty && !code.hasPrefix("S") { sp = await stakePoint(key, code, firstStake.km, firstStake.metres, nil) }
             if let sp {
                 var conf = sp.conf
                 if (sp.ambiguous || code.hasPrefix("S")) && region.isEmpty { conf = "low" }
@@ -257,8 +396,13 @@ enum Recog {
                 }
                 var hit = blank
                 hit.latitude = sp.lat; hit.longitude = sp.lon; hit.endLatitude = endLat; hit.endLongitude = endLon
-                hit.method = "stake"; hit.how = sp.how; hit.address = sp.addr; hit.confidence = conf; hit.roadCode = code
-                hit.stake = stakeLabel(firstStake.km, firstStake.metres ?? 0)
+                hit.method = (p.stakes.count == 1 && sig.overlay?.km == firstStake.km) ? "overlay-stake" : "stake"
+                hit.how = sp.how; hit.address = sp.addr; hit.confidence = conf; hit.roadCode = code
+                if endLat != nil, p.stakes.count > 1 {
+                    hit.stake = stakeLabel(firstStake.km, firstStake.metres ?? 0) + "-" + stakeLabel(p.stakes[1].km, p.stakes[1].metres ?? 0)
+                } else {
+                    hit.stake = stakeLabel(firstStake.km, firstStake.metres ?? 0)
+                }
                 return hit
             }
             if p.facility == nil { return nil }
@@ -279,6 +423,9 @@ enum Recog {
             hit.latitude = lat; hit.longitude = lon; hit.method = method; hit.how = how; hit.address = b.admin; hit.confidence = conf; hit.roadCode = p.code ?? ""
             return hit
         }
+        if chromeOnly(p.norm) || ((p.code != nil || !(p.roadName ?? "").isEmpty) && p.facility == nil && p.stakes.isEmpty && p.glued.isEmpty) || (!p.stakes.isEmpty && p.code == nil && p.facility == nil) {
+            return nil
+        }
         guard let geo = await get(key, "v3/geocode/geo", ["address": p.norm]),
               let row = (geo["geocodes"] as? [[String: Any]])?.first,
               let loc = split(row["location"] as? String ?? ""),
@@ -286,7 +433,8 @@ enum Recog {
         let w = CoordinateConverter.gcj02ToWgs84(.init(latitude: loc.1, longitude: loc.0))
         let addr = (row["formatted_address"] as? String) ?? ""
         let adminLevel = ["省","市","区县","乡镇","村庄","道路","开发区"].contains(levelName)
-        let conf = (adminLevel || p.facility != nil || (!region.isEmpty && !region.contains(where: { addr.contains($0) }))) ? "low" : "medium"
+        if adminLevel { return nil }
+        let conf = (p.facility != nil || (!region.isEmpty && !region.contains(where: { addr.contains($0) }))) ? "low" : "medium"
         var hit = blank
         hit.latitude = w.latitude; hit.longitude = w.longitude; hit.method = "geocode"; hit.how = "level=\(levelName)"; hit.address = addr; hit.confidence = conf
         return hit
@@ -523,6 +671,7 @@ enum Recog {
 
     private static func regionWords(_ p: TicketParse, _ sig: RegionSignals, _ full: String, _ key: String) async -> [String] {
         var w = sig.provinces.map(\.1)
+        if let pv = nameProvince[p.nameCanon ?? ""] ?? nameProvince[p.roadName ?? ""] { w.append(pv) }
         if !key.isEmpty { for c in await cities(key) where full.contains(c) || p.norm.contains(c) { w.append(c) } }
         for a in p.admin {
             for piece in all("[\\p{Han}]+?(?:省|自治区|自治州|市|地区|县|区)", a) {

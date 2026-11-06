@@ -38,6 +38,34 @@ struct CommunitySyncResult {
 }
 
 enum CommunityClient {
+    struct MyReport: Decodable, Identifiable, Equatable {
+        var id: String
+        var name: String
+        var status: String
+        var roadCode: String
+        var stake: String
+
+        var label: String { SubmissionStatus.label(status) }
+
+        enum CodingKeys: String, CodingKey {
+            case id, name, status, stake
+            case roadCode = "road_code"
+        }
+    }
+
+    private struct MyReportList: Decodable {
+        var reports: [MyReport]
+    }
+
+    static func myReports(baseURL: String) async throws -> [MyReport] {
+        let root = try endpoint(baseURL, "v1/me/reports")
+        var request = URLRequest(url: root)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 20
+        ApiHeaders.apply(&request)
+        return try await send(request, as: MyReportList.self).reports
+    }
+
     static func submit(
         baseURL: String,
         deviceID: String,

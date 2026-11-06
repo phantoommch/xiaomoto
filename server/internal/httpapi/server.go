@@ -32,21 +32,22 @@ type Server struct {
 }
 
 type HandlerOptions struct {
-	AdminToken    string
-	MaxImage      int
-	DB            *store.Store
-	Apps          *appdist.Catalog
-	PublicBase    string
-	DevMode       bool
-	ReviewEmail   string
-	ReviewCode    string
-	TermsPath     string
-	TermsVersion  string
-	Mail          mail.Config
-	AmapKey       string
-	Locate        func(context.Context, store.ReportInput) recog.Result
-	RelocDeadline time.Duration
-	RelocQueue    int
+	AdminToken       string
+	MaxImage         int
+	DB               *store.Store
+	Apps             *appdist.Catalog
+	PublicBase       string
+	DevMode          bool
+	ReviewEmail      string
+	ReviewCode       string
+	TermsPath        string
+	TermsVersion     string
+	Mail             mail.Config
+	AmapKey          string
+	Locate           func(context.Context, store.ReportInput) recog.Result
+	RelocDeadline    time.Duration
+	RelocQueue       int
+	ReprocessOnStart bool
 }
 
 func New(adminToken string, maxImageBytes int, db *store.Store) http.Handler {
@@ -89,6 +90,9 @@ func NewWithOptions(opts HandlerOptions) http.Handler {
 		relocQueue:    opts.RelocQueue,
 	}
 	s.startRelocator()
+	if opts.ReprocessOnStart {
+		s.startReprocess()
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.health)
 	mux.HandleFunc("GET /privacy", s.privacyPage)
@@ -98,6 +102,7 @@ func NewWithOptions(opts HandlerOptions) http.Handler {
 	mux.HandleFunc("POST /v1/auth/verify", s.verifyCode)
 	mux.HandleFunc("POST /v1/auth/logout", s.logout)
 	mux.HandleFunc("GET /v1/me", s.me)
+	mux.HandleFunc("GET /v1/me/reports", s.myReports)
 	mux.HandleFunc("DELETE /v1/me", s.deleteMe)
 	mux.HandleFunc("GET /v1/legal/terms", s.terms)
 	mux.HandleFunc("POST /v1/legal/accept", s.acceptTerms)
@@ -113,6 +118,7 @@ func NewWithOptions(opts HandlerOptions) http.Handler {
 	mux.HandleFunc("POST /v1/admin/reports/{id}/reject", s.admin(s.reject))
 	mux.HandleFunc("POST /v1/admin/reports/{id}", s.admin(s.editReport))
 	mux.HandleFunc("POST /v1/admin/reports/merge", s.admin(s.merge))
+	mux.HandleFunc("POST /v1/admin/reports/reprocess", s.admin(s.reprocessReports))
 	mux.HandleFunc("POST /v1/admin/points/{id}/segment", s.admin(s.makeSegment))
 	mux.HandleFunc("DELETE /v1/admin/points/{id}", s.admin(s.deletePoint))
 	mux.HandleFunc("POST /v1/admin/app", s.admin(s.publishApp))

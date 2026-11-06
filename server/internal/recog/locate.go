@@ -33,14 +33,21 @@ type Result struct {
 	Level     string  `json:"confidence"`
 }
 
-func (r Result) stakeLabel() string {
+// StakeLabel is the pile shown on a review card. An interval keeps both ends.
+func (r Result) StakeLabel() string {
 	if !r.HasStake {
 		return ""
 	}
-	if r.StakeM > 0 || r.How != "" {
-		return fmt.Sprintf("K%d+%d", int(r.StakeKM), r.StakeM)
+	label := fmt.Sprintf("K%d+%d", int(r.StakeKM), r.StakeM)
+	if r.HasEnd && len(r.Parsed.Stakes) > 1 {
+		end := r.Parsed.Stakes[1]
+		metres := 0
+		if end.Metres != nil {
+			metres = *end.Metres
+		}
+		label += fmt.Sprintf("-K%d+%d", int(end.KM), metres)
 	}
-	return fmt.Sprintf("K%d", int(r.StakeKM))
+	return label
 }
 
 // LevelOf maps the prototype confidence onto the two publish buckets.
@@ -89,11 +96,12 @@ type point struct {
 	ambiguous       bool
 }
 
-// Locate runs the prototype pipeline. amap may be nil; then only parsing is filled in.
+// Locate runs the production pipeline. amap may be nil; then only parsing is filled in.
 func Locate(text, full, overlay string, amap Map) Result {
-	p := Parse(text)
-	sig := ExtractSignals(full, overlay)
-	if sig.Overlay == nil && full != "" && full != text {
+	body, ov := richerSources(text, full, overlay)
+	p := Parse(body)
+	sig := ExtractSignals(full, ov)
+	if sig.Overlay == nil && full != "" && full != body {
 		if extra := ExtractSignals(full, full); extra.Overlay != nil {
 			sig.Overlay = extra.Overlay
 		}
@@ -101,6 +109,7 @@ func Locate(text, full, overlay string, amap Map) Result {
 			sig.OverlayDir = ExtractSignals(full, full).OverlayDir
 		}
 	}
+	p = absorbOverlay(p, sig)
 	region := regionWords(p, sig, full, amap)
 	res := Result{Parsed: p, Direction: p.Direction, RoadName: p.NameCanon}
 	if res.RoadName == "" {
@@ -130,7 +139,9 @@ func Locate(text, full, overlay string, amap Map) Result {
 		res.Conf = "none"
 		return finish(res)
 	}
-	if ol := sig.Overlay; ol != nil && ol.Code != "" {
+	// A coded overlay is the camera mouth. A two-stake body is an interval:
+	// keep both ends instead of returning the overlay's single pile.
+	if ol := sig.Overlay; ol != nil && ol.Code != "" && !(p.Range && len(p.Stakes) >= 2) {
 		if sp := stakePoint(amap, ol.Code, ol.KM, &ol.M, region); sp != nil {
 			res = applyPoint(res, *sp)
 			res.Method = "overlay-stake"
@@ -188,7 +199,9 @@ func Locate(text, full, overlay string, amap Map) Result {
 	if p.Code != "" && len(p.Stakes) > 0 {
 		km, me := p.Stakes[0].KM, p.Stakes[0].Metres
 		sp := stakePoint(amap, p.Code, km, me, region)
-		if sp == nil && len(region) > 0 {
+		// National codes are unique. A provincial S-code is not: don't drop the
+		// province filter and pin another province's same number.
+		if sp == nil && len(region) > 0 && !strings.HasPrefix(p.Code, "S") {
 			sp = stakePoint(amap, p.Code, km, me, nil)
 		}
 		if sp != nil {
@@ -206,6 +219,9 @@ func Locate(text, full, overlay string, amap Map) Result {
 				metres = *me
 			}
 			res.StakeKM, res.StakeM, res.HasStake = km, metres, true
+			if len(p.Stakes) == 1 && sig.Overlay != nil && p.Stakes[0].KM == sig.Overlay.KM {
+				res.Method = "overlay-stake"
+			}
 			if p.Range && len(p.Stakes) > 1 {
 				km2, me2 := p.Stakes[1].KM, p.Stakes[1].Metres
 				if sp2 := stakePoint(amap, p.Code, km2, me2, region); sp2 != nil {
@@ -259,6 +275,23 @@ func Locate(text, full, overlay string, amap Map) Result {
 			return finish(res)
 		}
 	}
+	// A highway name with no pile, or a screen full of 违法处理 chrome, is not a
+	// place. Generic geocode of that text is what pinned 三清高速 at a village
+	// ~100 km from the stake.
+	if chromeOnly(p.Norm) || ((p.Code != "" || p.RoadName != "") && p.Facility == "" && len(p.Stakes) == 0 && len(p.Glued) == 0) || (len(p.Stakes) > 0 && p.Code == "" && p.Facility == "") {
+		res.Method = "stake-unresolved"
+		res.Conf = "none"
+		if chromeOnly(p.Norm) {
+			res.Method = "invalid"
+			res.How = "ticket chrome without a location"
+		} else if p.Code != "" {
+			res.Road = p.Code
+			res.How = fmt.Sprintf("no stake to look up on %s", p.Code)
+		} else {
+			res.How = "stake or road without a route code"
+		}
+		return finish(res)
+	}
 	d, err := amap.Get("v3/geocode/geo", map[string]string{"address": p.Norm})
 	var g map[string]any
 	if err == nil && d != nil {
@@ -277,11 +310,17 @@ func Locate(text, full, overlay string, amap Map) Result {
 			if adminLevel[level] || p.Facility != "" || (len(region) > 0 && !containsAny(addr, region)) {
 				conf = "low"
 			}
-			res.Lat, res.Lon, res.HasPoint = wlat, wlon, true
 			res.Method = "geocode"
 			res.Addr = addr
 			res.How = "level=" + level
 			res.Conf = conf
+			// 省/市/区县/乡镇/村庄/道路 is not a stake hit. Leave the point unresolved
+			// instead of publishing a pin that can sit a hundred kilometres off.
+			if adminLevel[level] {
+				res.Conf = "none"
+				return finish(res)
+			}
+			res.Lat, res.Lon, res.HasPoint = wlat, wlon, true
 			return finish(res)
 		}
 	}
@@ -1010,10 +1049,50 @@ func sideScore(side string, lon, lat float64) float64 {
 	}
 }
 
+func absorbOverlay(p Parsed, sig Signals) Parsed {
+	ol := sig.Overlay
+	if ol == nil {
+		return p
+	}
+	if p.Code == "" {
+		if ol.Code != "" {
+			p.Code = ol.Code
+		} else if core := roadCore(ol.Name); core != "" {
+			code, canon, how := NameToCode(core, "")
+			if code != "" {
+				p.Code = code
+				if p.NameCanon == "" {
+					p.NameCanon = canon
+					p.NameHow = how
+				}
+				if p.RoadName == "" {
+					p.RoadName = core
+				}
+			}
+		}
+	}
+	if len(p.Stakes) == 0 && (ol.KM > 0 || ol.M > 0) {
+		metres := ol.M
+		p.Stakes = []Stake{{KM: ol.KM, Metres: &metres}}
+	}
+	if sig.OverlayDir != "" && !strings.Contains(p.Direction, sig.OverlayDir) {
+		if p.Direction != "" {
+			p.Direction += " "
+		}
+		p.Direction += sig.OverlayDir
+	}
+	return p
+}
+
 func regionWords(p Parsed, sig Signals, full string, amap Map) []string {
 	var w []string
 	for _, h := range sig.Provinces {
 		w = append(w, h.Name)
+	}
+	if pv, ok := nameProvince[p.NameCanon]; ok {
+		w = append(w, pv)
+	} else if pv, ok := nameProvince[p.RoadName]; ok {
+		w = append(w, pv)
 	}
 	if amap != nil && (strings.Contains(full, "市") || strings.Contains(p.Norm, "市")) {
 		for _, c := range amap.Cities() {

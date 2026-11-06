@@ -59,18 +59,19 @@ func main() {
 	}
 	defer db.Close()
 	handler := httpapi.NewWithOptions(httpapi.HandlerOptions{
-		AdminToken:   cfg.AdminToken,
-		MaxImage:     cfg.MaxImageBytes,
-		DB:           db,
-		Apps:         apps,
-		PublicBase:   cfg.PublicBaseURL,
-		DevMode:      cfg.AuthDev,
-		ReviewEmail:  cfg.ReviewEmail,
-		ReviewCode:   cfg.ReviewCode,
-		TermsPath:    termsPath,
-		TermsVersion: cfg.TermsVersion,
-		Mail:         cfg.Mail,
-		AmapKey:      cfg.AmapKey,
+		AdminToken:       cfg.AdminToken,
+		MaxImage:         cfg.MaxImageBytes,
+		DB:               db,
+		Apps:             apps,
+		PublicBase:       cfg.PublicBaseURL,
+		DevMode:          cfg.AuthDev,
+		ReviewEmail:      cfg.ReviewEmail,
+		ReviewCode:       cfg.ReviewCode,
+		TermsPath:        termsPath,
+		TermsVersion:     cfg.TermsVersion,
+		Mail:             cfg.Mail,
+		AmapKey:          cfg.AmapKey,
+		ReprocessOnStart: cfg.AmapKey != "",
 	})
 	server := &http.Server{
 		Addr:              cfg.Addr,

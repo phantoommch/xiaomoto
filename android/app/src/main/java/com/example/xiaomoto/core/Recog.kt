@@ -62,7 +62,10 @@ object Recog {
         "杭长" to "G6021", "杭金衢" to "G60", "申嘉湖" to "S12", "苏锡常南部" to "S58", "沪常" to "S58", "广河" to "S2",
         "成宜昭" to "S4", "威砚" to "S11", "枣木" to "S83", "岚菏" to "S38", "芜合" to "G5011", "南芜" to "G4211",
         "沪武" to "G4221", "淮徐" to "G2513", "甬舟" to "G9211", "渝黔" to "G75", "渝湘" to "G65", "合安" to "G3",
+        // Signed Yunnan S34, 曲靖三宝–昆明清水. Marker hits must come back in Yunnan.
+        "三清" to "S34",
     )
+    private val nameProvince = mapOf("三清" to "云南")
     private val provinces = listOf(
         "北京", "天津", "上海", "重庆", "河北", "山西", "辽宁", "吉林", "黑龙江", "江苏", "浙江", "安徽", "福建",
         "江西", "山东", "河南", "湖北", "湖南", "广东", "海南", "四川", "贵州", "云南", "陕西", "甘肃", "青海",
@@ -121,11 +124,10 @@ object Recog {
         var range = false
         if (stakes.size >= 2) {
             val between = t2.substring(stakes[0].span.second, stakes[1].span.first)
-            if (Regex("""\s*(?:-|—|–|~|～|至|到|_)\s*""").containsMatchIn(between) || between.length < 12) range = true
+            if (Regex("""\s*(?:-|—|–|~|～|至|到|_|·|・|•)\s*""").containsMatchIn(between) || between.length < 12) range = true
         }
-        var direction: String? = null
         val tnr = Regex("""[\u4e00-\u9fff]{2,6}?(?:高速公路|高速|快速路)""").replace(t, " ")
-        Regex("""([\u4e00-\u9fff]{1,6}?)方向""").find(tnr)?.let { direction = it.value }
+        var direction: String? = Regex("""([\u4e00-\u9fff]{1,6}?)方向""").findAll(tnr).map { it.value }.distinct().joinToString(" ").ifBlank { null }
         for (w in listOf("上行", "下行", "A道", "B道")) {
             if (t.contains(w)) direction = listOfNotNull(direction, w).joinToString(" ")
         }
@@ -173,10 +175,13 @@ object Recog {
         val o = normalize(overlay).ifBlank { t }
         var fix: OverlayFix? = null
         var dir: String? = null
-        Regex("""地点[:：]?\s*([GS]\d{1,4})?([\u4e00-\u9fff]{0,6})K(\d{1,4})\+(\d{1,4})""").find(o)?.let { m ->
+        Regex("""地点[:：]?\s*([GS]\d{1,4})?([\u4e00-\u9fff]{0,12})K(\d{1,4})\+(\d{1,4})""").find(o)?.let { m ->
             fix = OverlayFix(m.groupValues[1].ifBlank { null }, m.groupValues[2], m.groupValues[3].toDouble(), m.groupValues[4].toInt())
         }
-        Regex("""(?:通行|行驶)方向[:：]?\s*(上行|下行)""").find(o)?.let { dir = it.groupValues[1] }
+        val dirs = mutableListOf<String>()
+        Regex("""(?:通行|行驶)方向[:：]?\s*(上行|下行)""").find(o)?.let { dirs += it.groupValues[1] }
+        Regex("""K\d{1,4}\+\d{1,4}\s*(?:M|米)?\s*([\u4e00-\u9fff]{1,8}方向)""").find(o)?.let { if (it.groupValues[1] !in dirs) dirs += it.groupValues[1] }
+        dir = dirs.joinToString(" ").ifBlank { null }
         Regex("""设备编号[:：]?\s*(\d{6})""").find(o)?.let { m -> adcode[m.groupValues[1].take(2)]?.let { provs += "device" to it } }
         return RegionSignals(provs, plate, fix, dir)
     }
@@ -188,20 +193,146 @@ object Recog {
         else -> "low"
     }
 
+    private fun roadCore(name: String): String {
+        val trimmed = name.trim()
+        for (suf in listOf("高速公路", "快速路", "高速")) {
+            if (trimmed.endsWith(suf) && trimmed.length > suf.length) return trimmed.removeSuffix(suf)
+        }
+        return trimmed
+    }
+
+    private fun absorb(p: TicketParse, sig: RegionSignals): TicketParse {
+        val ol = sig.overlay ?: return p
+        var code = p.code
+        var canon = p.nameCanon
+        var how = p.nameHow
+        var road = p.roadName
+        var stakes = p.stakes
+        var direction = p.direction
+        if (code.isNullOrBlank()) {
+            val named = roadCore(ol.name)
+            val hit = if (ol.code.isNullOrBlank()) nameToCode(named, null) else null
+            code = ol.code?.takeIf { it.isNotBlank() } ?: hit?.first
+            if (canon.isNullOrBlank() && hit != null) {
+                canon = hit.second
+                how = hit.third
+            }
+            if (road.isNullOrBlank() && named.isNotBlank()) road = named
+        }
+        if (stakes.isEmpty() && (ol.km > 0 || ol.metres > 0)) stakes = listOf(RoadStake(ol.km, ol.metres))
+        val extra = sig.overlayDir
+        if (!extra.isNullOrBlank() && direction?.contains(extra) != true) {
+            direction = listOfNotNull(direction, extra).filter { it.isNotBlank() }.joinToString(" ")
+        }
+        return p.copy(code = code, nameCanon = canon, nameHow = how, roadName = road, stakes = stakes, direction = direction)
+    }
+
+    private val ticketLabels = listOf("申请陈述和申辩", "违法地点", "违法时间", "违法行为", "违法车辆", "号牌号码", "罚款金额", "记分", "罚款")
+
+    private fun ticketLabel(line: String): String {
+        val trimmed = line.trim()
+        var best = ""
+        for (label in ticketLabels) {
+            if (!trimmed.startsWith(label) || label.length <= best.length) continue
+            val rest = trimmed.drop(label.length)
+            val sep = rest.isEmpty() || rest.startsWith(":") || rest.startsWith("：") || rest.startsWith(" ") || rest.startsWith("\t")
+            val fine = (label == "罚款" || label == "记分" || label == "罚款金额") && rest.firstOrNull()?.isDigit() == true
+            if (sep || fine) best = label
+        }
+        return best
+    }
+
+    private fun continuesLocation(line: String): Boolean {
+        val s = line.trim()
+        if (s.isEmpty() || ticketLabel(s).isNotEmpty()) return false
+        return s.startsWith("公里") || s.startsWith("千米") || s.startsWith("米") || s.contains("公里") || s.contains("千米") || s.contains("高速") || s.contains("+")
+    }
+
+    private fun labeledLocation(full: String): String {
+        val lines = full.replace("\r\n", "\n").split('\n').map { it.trim() }.filter { it.isNotEmpty() }
+        for (i in lines.indices) {
+            if (ticketLabel(lines[i]) != "违法地点") continue
+            val parts = mutableListOf<String>()
+            var start = i
+            val inline = lines[i].substringAfter("违法地点").trimStart(':', '：', ' ', '\t')
+            if (inline.isNotEmpty()) parts += inline else if (i + 1 < lines.size && ticketLabel(lines[i + 1]).isEmpty()) {
+                start = i + 1
+                parts += lines[start]
+            }
+            var j = start + 1
+            while (j < lines.size && ticketLabel(lines[j]).isEmpty() && continuesLocation(lines[j])) {
+                parts += lines[j]
+                j += 1
+            }
+            return parts.joinToString("")
+        }
+        return ""
+    }
+
+    private fun stakeScore(s: String): Int {
+        if (s.isBlank()) return 0
+        val p = parse(s)
+        var score = p.stakes.size * 10 + p.glued.size * 8
+        score += p.stakes.count { it.metres != null } * 3
+        if (p.range && p.stakes.size >= 2) score += 5
+        if (!p.code.isNullOrBlank()) score += 1
+        return score
+    }
+
+    private fun richerBody(location: String, full: String): String {
+        val lines = full.replace("\r\n", "\n").split('\n').map { it.trim() }.filter { it.isNotEmpty() }
+        val cands = mutableListOf(location.trim(), labeledLocation(full))
+        for (i in lines.indices) {
+            cands += lines[i]
+            if (i + 1 < lines.size && ticketLabel(lines[i + 1]).isEmpty()) cands += lines[i] + lines[i + 1]
+        }
+        var best = ""
+        var bestScore = -1
+        for (c in cands) {
+            val text = c.trim()
+            if (text.isEmpty()) continue
+            val sc = stakeScore(text)
+            if (sc > bestScore || (sc == bestScore && sc > 0 && text.length < best.length)) {
+                best = text
+                bestScore = sc
+            }
+        }
+        return best.ifBlank { location.trim() }
+    }
+
+    private val chromePhrases = listOf(
+        "如对违法无异议", "无需申请陈述和申辩", "请直接处理", "申请陈述和申辩",
+        "加入处理清单", "处理并缴款", "处理清单是空的", "违法处理",
+        "违法车辆", "违法时间", "违法行为", "违法地点", "号牌号码", "罚款金额",
+        "返回", "记分", "罚款", "看地图", "驳回",
+    )
+
+    private fun chromeOnly(s: String): Boolean {
+        val t = normalize(s)
+        if (t.isBlank()) return true
+        if (Regex("""[\u4e00-\u9fff]{2,6}?(?:高速公路|高速|快速路)|K\d{1,4}\s*\+|(\d{1,4})\s*(?:公里|千米|KM)|收费站|服务区|停车区|隧道|特大桥|大桥|枢纽|互通|[GS]\d{1,4}""").containsMatchIn(t)) return false
+        var stripped = t
+        for (w in chromePhrases) stripped = stripped.replace(w, "")
+        stripped = Regex("""[\d\s:：,，.。、·\-—–~～_|/\\（）()]+""").replace(stripped, "")
+        return stripped.isBlank()
+    }
+
     fun locate(text: String, full: String, key: String): LocatedPoint? {
-        val parsed = parse(text.ifBlank { full })
+        val body = richerBody(text, full)
         val sig = signals(if (full.isBlank()) text else full)
+        val parsed = absorb(parse(body.ifBlank { full.ifBlank { text } }), sig)
         val region = regionWords(parsed, sig, full.ifBlank { text }, key)
         val hit = locateParsed(parsed, sig, region, key) ?: return null
+        if (!hit.latitude.isFinite()) return null
         val roadName = hit.roadName.ifBlank { parsed.nameCanon ?: parsed.roadName.orEmpty() }
         val direction = listOfNotNull(parsed.direction, sig.overlayDir).filter { it.isNotBlank() }.distinct().joinToString(" ")
-        return hit.copy(roadName = roadName, direction = direction, parsed = parsed, confidence = level(hit.method, hit.confidence, hit.how).let { if (!hit.latitude.isFinite()) "low" else it })
+        return hit.copy(roadName = roadName, direction = direction, parsed = parsed, confidence = level(hit.method, hit.confidence, hit.how))
     }
 
     private fun locateParsed(p: TicketParse, sig: RegionSignals, region: List<String>, key: String): LocatedPoint? {
         val blank = LocatedPoint(Double.NaN, Double.NaN, null, null, "", "", "", "none", p.code.orEmpty(), p.nameCanon ?: "", "", p.direction.orEmpty(), p)
         sig.overlay?.let { ol ->
-            if (!ol.code.isNullOrBlank()) {
+            if (!ol.code.isNullOrBlank() && !(p.range && p.stakes.size >= 2)) {
                 stakePoint(key, ol.code, ol.km, ol.metres, region)?.let { sp ->
                     return blank.copy(latitude = sp.lat, longitude = sp.lon, method = "overlay-stake", how = sp.how, address = sp.addr, confidence = "high", roadCode = ol.code, stake = stakeLabel(ol.km, ol.metres))
                 }
@@ -228,7 +359,7 @@ object Recog {
             val km = p.stakes[0].km
             val me = p.stakes[0].metres
             var sp = stakePoint(key, p.code, km, me, region)
-            if (sp == null && region.isNotEmpty()) sp = stakePoint(key, p.code, km, me, null)
+            if (sp == null && region.isNotEmpty() && !p.code.startsWith("S")) sp = stakePoint(key, p.code, km, me, null)
             if (sp != null) {
                 var conf = sp.conf
                 if ((sp.ambiguous || p.code.startsWith("S")) && region.isEmpty()) conf = "low"
@@ -241,10 +372,17 @@ object Recog {
                         endLon = it.lon
                     }
                 }
+                val overlayFix = sig.overlay
+                val method = if (p.stakes.size == 1 && overlayFix != null && p.stakes[0].km == overlayFix.km) "overlay-stake" else "stake"
+                val stake = if (endLat != null && p.stakes.size > 1) {
+                    stakeLabel(km, me ?: 0) + "-" + stakeLabel(p.stakes[1].km, p.stakes[1].metres ?: 0)
+                } else {
+                    stakeLabel(km, me ?: 0)
+                }
                 return blank.copy(
                     latitude = sp.lat, longitude = sp.lon, endLatitude = endLat, endLongitude = endLon,
-                    method = "stake", how = sp.how, address = sp.addr, confidence = conf, roadCode = p.code,
-                    stake = stakeLabel(km, me ?: 0),
+                    method = method, how = sp.how, address = sp.addr, confidence = conf, roadCode = p.code,
+                    stake = stake,
                 )
             }
             if (p.facility == null) return null
@@ -276,6 +414,9 @@ object Recog {
                 return blank.copy(latitude = lat, longitude = lon, method = method, how = how, address = b.admin, confidence = conf, roadCode = p.code.orEmpty())
             }
         }
+        if (chromeOnly(p.norm) || ((p.code != null || !p.roadName.isNullOrBlank()) && p.facility == null && p.stakes.isEmpty() && p.glued.isEmpty()) || (p.stakes.isNotEmpty() && p.code.isNullOrBlank() && p.facility == null)) {
+            return null
+        }
         val geo = get(key, "v3/geocode/geo", mapOf("address" to p.norm)) ?: return null
         val row = geo.optJSONArray("geocodes")?.optJSONObject(0) ?: return null
         val loc = split(row.optString("location")) ?: return null
@@ -283,7 +424,8 @@ object Recog {
         val levelName = row.optString("level")
         val addr = row.optString("formatted_address")
         val adminLevel = levelName in setOf("省", "市", "区县", "乡镇", "村庄", "道路", "开发区")
-        val conf = if (adminLevel || p.facility != null || (region.isNotEmpty() && region.none { it in addr })) "low" else "medium"
+        if (adminLevel) return null
+        val conf = if (p.facility != null || (region.isNotEmpty() && region.none { it in addr })) "low" else "medium"
         return blank.copy(latitude = w.latitude, longitude = w.longitude, method = "geocode", how = "level=$levelName", address = addr, confidence = conf)
     }
 
@@ -529,6 +671,7 @@ object Recog {
 
     private fun regionWords(p: TicketParse, sig: RegionSignals, full: String, key: String): List<String> {
         val w = sig.provinces.map { it.second }.toMutableList()
+        nameProvince[p.nameCanon]?.let { w += it } ?: nameProvince[p.roadName]?.let { w += it }
         if (key.isNotBlank()) for (c in cities(key)) if (c in full || c in p.norm) w += c
         for (a in p.admin) {
             for (piece in Regex("""[\u4e00-\u9fff]+?(?:省|自治区|自治州|市|地区|县|区)""").findAll(a)) {

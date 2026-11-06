@@ -45,6 +45,7 @@ import androidx.core.content.ContextCompat
 import com.example.xiaomoto.BuildConfig
 import com.example.xiaomoto.MotoApplication
 import com.example.xiaomoto.core.AlertDistance
+import com.example.xiaomoto.core.SubmissionStatus
 import com.example.xiaomoto.core.AppRelease
 import com.example.xiaomoto.net.AppUpdateController
 import com.example.xiaomoto.oem.OemGuides
@@ -292,6 +293,28 @@ fun SettingsScreen() {
         }
         Text("账号", style = MaterialTheme.typography.titleMedium)
         Text(accountEmail.ifBlank { "已登录" })
+        var myReports by remember { mutableStateOf<List<com.example.xiaomoto.net.AuthClient.MineReport>>(emptyList()) }
+        TextButton(onClick = {
+            val token = app.session.token.value
+            val base = app.settings.communityBaseUrl.value
+            if (token.isNullOrBlank()) {
+                status = "登录后可以查看上报是否已通过。"
+                return@TextButton
+            }
+            Thread {
+                val loaded = runCatching { com.example.xiaomoto.net.AuthClient.myReports(base, token) }.getOrDefault(emptyList())
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    myReports = loaded
+                    if (loaded.isEmpty()) status = "还没有上报。"
+                }
+            }.start()
+        }) { Text("刷新上报结果") }
+        if (myReports.isEmpty()) {
+            Text("通过后这里会显示「已通过」。", style = MaterialTheme.typography.bodySmall)
+        }
+        for (row in myReports) {
+            Text(SubmissionStatus.label(row.status) + " · " + listOf(row.roadCode, row.stake, row.name).filter { it.isNotBlank() }.joinToString(" "))
+        }
         TextButton(onClick = {
             Thread {
                 val loaded = runCatching {

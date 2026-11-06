@@ -35,6 +35,32 @@ object AuthClient {
         val termsAccepted: Boolean,
     )
     data class Session(val token: String, val email: String, val termsVersion: String)
+    data class MineReport(
+        val id: String,
+        val name: String,
+        val status: String,
+        val roadCode: String,
+        val stake: String,
+    )
+
+    fun myReports(baseUrl: String, token: String): List<MineReport> {
+        val json = call(baseUrl, "v1/me/reports", "GET", null, token)
+        val rows = json.optJSONArray("reports") ?: return emptyList()
+        return buildList {
+            for (index in 0 until rows.length()) {
+                val row = rows.optJSONObject(index) ?: continue
+                add(
+                    MineReport(
+                        id = row.optString("id"),
+                        name = row.optString("name"),
+                        status = row.optString("status"),
+                        roadCode = row.optString("road_code"),
+                        stake = row.optString("stake"),
+                    ),
+                )
+            }
+        }
+    }
 
     fun requestCode(baseUrl: String, email: String) {
         val json = call(baseUrl, "v1/auth/request-code", "POST", JSONObject().put("email", email), null)

@@ -11,6 +11,7 @@ struct SettingsView: View {
     @State private var accountTerms = ""
     @State private var showAccountTerms = false
     @State private var confirmDelete = false
+    @State private var myReports: [CommunityClient.MyReport] = []
 
     var body: some View {
         NavigationStack {
@@ -45,6 +46,20 @@ struct SettingsView: View {
                 Section("账号") {
                     if session.isLoggedIn {
                         Text(session.email.isEmpty ? "已登录" : session.email)
+                        if myReports.isEmpty {
+                            Text("还没有上报。通过后会显示「已通过」。")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                        ForEach(myReports) { row in
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(row.label)
+                                Text([row.roadCode, row.stake, row.name].filter { !$0.isEmpty }.joined(separator: " "))
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        Button("刷新上报结果") { Task { await loadReports() } }
                         Button("用户协议与免责声明") {
                             Task {
                                 accountTerms = await TermsLoader.load(baseURL: settings.communityBaseURL).markdown
@@ -77,6 +92,7 @@ struct SettingsView: View {
                     }
                 }
             }
+            .task(id: session.isLoggedIn) { await loadReports() }
             .safeAreaInset(edge: .bottom) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(AppUpdateLink.currentVersionLine(AppUpdateClient.localVersionCode))
@@ -120,6 +136,14 @@ struct SettingsView: View {
                 Text("注销后这台手机上的登录会被清掉。已经公开的违法点还会留在地图上，但不再和这个邮箱关联。")
             }
         }
+    }
+
+    private func loadReports() async {
+        guard session.isLoggedIn else {
+            myReports = []
+            return
+        }
+        myReports = (try? await CommunityClient.myReports(baseURL: settings.communityBaseURL)) ?? myReports
     }
 
     private func loadDistances() {

@@ -169,33 +169,34 @@ func fixOO(s string) string {
 }
 
 var (
-	reStakeKPlus = regexp.MustCompile(`K(\d{1,4})\s*\+\s*(\d{1,4})\s*(?:M|米)?`)
-	reStakeKM    = regexp.MustCompile(`(\d{1,4}(?:\.\d+)?)\s*(?:公里|千米|KM)\s*\+?\s*(\d{1,4})?\s*(?:米|M)?`)
-	reStakeKOnly = regexp.MustCompile(`K(\d{1,4})`)
-	reRoadName   = regexp.MustCompile(`([\p{Han}]{2,6}?)(?:高速公路|高速|快速路)`)
-	reAdminStrip = regexp.MustCompile(`^.*(?:省|市|县|区|州|盟|旗)`)
-	reGlued      = regexp.MustCompile(`([GS])(\d{3,8})\s*(?:公里|千米|KM)\s*(?:(\d{1,3})\s*(?:米|M)?)?`)
-	reCode       = regexp.MustCompile(`([GS]\d{1,4})`)
-	reRangeSep   = regexp.MustCompile(`\s*(?:-|—|–|~|～|至|到|_)\s*`)
-	reTruncEnd   = regexp.MustCompile(`-\s*[\p{Han}]{2,6}高速\s*$`)
-	reTruncOne   = regexp.MustCompile(`\d(?:米|M)?\s*-\s*[\p{Han}]{2,6}高速\s*$`)
-	reDir        = regexp.MustCompile(`([\p{Han}]{1,6}?)方向`)
-	reTravel     = regexp.MustCompile(`由([东南西北])向([东南西北])`)
-	reCompass    = regexp.MustCompile(`北向南|南向北|东向西|西向东`)
-	reFacility   = regexp.MustCompile(`([\p{Han}]{2,10}?)(收费站|服务区|停车区|隧道|特大桥|大桥|枢纽|互通|立交|站口)(?:([东南西北])?(入口|出口|洞口|口|进口))?`)
-	reFacStrip   = regexp.MustCompile(`^.*?(?:高速公路|高速|省|市|县|区段|区|段)`)
-	reFacLead    = regexp.MustCompile(`^(?:米|公里|千米|处|附近|往|至)+`)
-	reRoadBlank  = regexp.MustCompile(`[\p{Han}]{2,6}?(?:高速公路|高速|快速路)`)
-	reFacBlank   = regexp.MustCompile(`[\p{Han}]{1,10}?(?:收费站|服务区|停车区|隧道|特大桥|大桥|枢纽|互通|立交|站口)`)
-	reAdmin      = regexp.MustCompile(`([\p{Han}]{2,7}?(?:省|自治区|市|自治州|地区|县|区))`)
-	reSection    = regexp.MustCompile(`([\p{Han}]{2,3})(?:段|界)`)
-	reLegal      = regexp.MustCompile(`《(?:中华人民共和国)?([\p{Han}]{2,3}?)(?:省|自治区|市)[^》]{0,30}(?:条例|办法|规定)》`)
-	reSMS        = regexp.MustCompile(`12123\s*(\d{2})\d`)
-	rePlate      = regexp.MustCompile(`([京津沪渝冀晋辽吉黑苏浙皖闽赣鲁豫鄂湘粤琼川贵云陕甘青蒙桂藏宁新])[A-Z][A-Z0-9·]{4,6}`)
-	reOverlay    = regexp.MustCompile(`地点[:：]?\s*([GS]\d{1,4})?([\p{Han}]{0,6})K(\d{1,4})\+(\d{1,4})`)
-	reOverlayDir = regexp.MustCompile(`(?:通行|行驶)方向[:：]?\s*(上行|下行)`)
-	reDevice     = regexp.MustCompile(`设备编号[:：]?\s*(\d{6})`)
-	reHasKM      = regexp.MustCompile(`(?:公里|KM)`)
+	reStakeKPlus      = regexp.MustCompile(`K(\d{1,4})\s*\+\s*(\d{1,4})\s*(?:M|米)?`)
+	reStakeKM         = regexp.MustCompile(`(\d{1,4}(?:\.\d+)?)\s*(?:公里|千米|KM)\s*\+?\s*(\d{1,4})?\s*(?:米|M)?`)
+	reStakeKOnly      = regexp.MustCompile(`K(\d{1,4})`)
+	reRoadName        = regexp.MustCompile(`([\p{Han}]{2,6}?)(?:高速公路|高速|快速路)`)
+	reAdminStrip      = regexp.MustCompile(`^.*(?:省|市|县|区|州|盟|旗)`)
+	reGlued           = regexp.MustCompile(`([GS])(\d{3,8})\s*(?:公里|千米|KM)\s*(?:(\d{1,3})\s*(?:米|M)?)?`)
+	reCode            = regexp.MustCompile(`([GS]\d{1,4})`)
+	reRangeSep        = regexp.MustCompile(`\s*(?:-|—|–|~|～|至|到|_|·|・|•)\s*`)
+	reTruncEnd        = regexp.MustCompile(`-\s*[\p{Han}]{2,6}高速\s*$`)
+	reTruncOne        = regexp.MustCompile(`\d(?:米|M)?\s*-\s*[\p{Han}]{2,6}高速\s*$`)
+	reDir             = regexp.MustCompile(`([\p{Han}]{1,6}?)方向`)
+	reTravel          = regexp.MustCompile(`由([东南西北])向([东南西北])`)
+	reCompass         = regexp.MustCompile(`北向南|南向北|东向西|西向东`)
+	reFacility        = regexp.MustCompile(`([\p{Han}]{2,10}?)(收费站|服务区|停车区|隧道|特大桥|大桥|枢纽|互通|立交|站口)(?:([东南西北])?(入口|出口|洞口|口|进口))?`)
+	reFacStrip        = regexp.MustCompile(`^.*?(?:高速公路|高速|省|市|县|区段|区|段)`)
+	reFacLead         = regexp.MustCompile(`^(?:米|公里|千米|处|附近|往|至)+`)
+	reRoadBlank       = regexp.MustCompile(`[\p{Han}]{2,6}?(?:高速公路|高速|快速路)`)
+	reFacBlank        = regexp.MustCompile(`[\p{Han}]{1,10}?(?:收费站|服务区|停车区|隧道|特大桥|大桥|枢纽|互通|立交|站口)`)
+	reAdmin           = regexp.MustCompile(`([\p{Han}]{2,7}?(?:省|自治区|市|自治州|地区|县|区))`)
+	reSection         = regexp.MustCompile(`([\p{Han}]{2,3})(?:段|界)`)
+	reLegal           = regexp.MustCompile(`《(?:中华人民共和国)?([\p{Han}]{2,3}?)(?:省|自治区|市)[^》]{0,30}(?:条例|办法|规定)》`)
+	reSMS             = regexp.MustCompile(`12123\s*(\d{2})\d`)
+	rePlate           = regexp.MustCompile(`([京津沪渝冀晋辽吉黑苏浙皖闽赣鲁豫鄂湘粤琼川贵云陕甘青蒙桂藏宁新])[A-Z][A-Z0-9·]{4,6}`)
+	reOverlay         = regexp.MustCompile(`地点[:：]?\s*([GS]\d{1,4})?([\p{Han}]{0,12})K(\d{1,4})\+(\d{1,4})`)
+	reOverlayDir      = regexp.MustCompile(`(?:通行|行驶)方向[:：]?\s*(上行|下行)`)
+	reOverlayPlaceDir = regexp.MustCompile(`K\d{1,4}\+\d{1,4}\s*(?:M|米)?\s*([\p{Han}]{1,8}方向)`)
+	reDevice          = regexp.MustCompile(`设备编号[:：]?\s*(\d{6})`)
+	reHasKM           = regexp.MustCompile(`(?:公里|KM)`)
 )
 
 type span struct{ s, e int }
@@ -238,9 +239,13 @@ func Parse(text string) Parsed {
 		p.RangeTruncated = true
 	}
 	tnr := reRoadBlank.ReplaceAllString(t, " ")
-	if m := reDir.FindStringSubmatchIndex(tnr); m != nil {
-		p.Direction = tnr[m[0]:m[1]]
+	var dirs []string
+	for _, dir := range reDir.FindAllString(tnr, -1) {
+		if !containsStr(dirs, dir) {
+			dirs = append(dirs, dir)
+		}
 	}
+	p.Direction = strings.Join(dirs, " ")
 	for _, w := range []string{"上行", "下行", "A道", "B道"} {
 		if strings.Contains(t, w) {
 			if p.Direction != "" {
@@ -525,9 +530,14 @@ func ExtractSignals(fullText, overlay string) Signals {
 			me, _ := strconv.Atoi(m[4])
 			s.Overlay = &OverlayLoc{Code: m[1], Name: m[2], KM: km, M: me}
 		}
+		var dirs []string
 		if m := reOverlayDir.FindStringSubmatch(o); m != nil {
-			s.OverlayDir = m[1]
+			dirs = append(dirs, m[1])
 		}
+		if m := reOverlayPlaceDir.FindStringSubmatch(o); m != nil && !containsStr(dirs, m[1]) {
+			dirs = append(dirs, m[1])
+		}
+		s.OverlayDir = strings.Join(dirs, " ")
 		if m := reDevice.FindStringSubmatch(o); m != nil {
 			if name, ok := adcode2[m[1][:2]]; ok {
 				s.Provinces = append(s.Provinces, ProvHit{"device", name})
@@ -554,6 +564,216 @@ func authorityHit(t, p string) bool {
 		return true
 	}
 	return false
+}
+
+func containsStr(list []string, s string) bool {
+	for _, item := range list {
+		if item == s {
+			return true
+		}
+	}
+	return false
+}
+
+func roadCore(name string) string {
+	name = strings.TrimSpace(name)
+	for _, suf := range []string{"高速公路", "快速路", "高速"} {
+		if strings.HasSuffix(name, suf) && utf8.RuneCountInString(name) > utf8.RuneCountInString(suf) {
+			return strings.TrimSuffix(name, suf)
+		}
+	}
+	return name
+}
+
+var ticketLabels = []string{
+	"申请陈述和申辩", "违法地点", "违法时间", "违法行为", "违法车辆", "号牌号码", "罚款金额", "记分", "罚款",
+}
+
+func matchTicketLabel(line string) string {
+	trimmed := strings.TrimSpace(line)
+	best := ""
+	for _, label := range ticketLabels {
+		if !strings.HasPrefix(trimmed, label) {
+			continue
+		}
+		if utf8.RuneCountInString(label) <= utf8.RuneCountInString(best) {
+			continue
+		}
+		rest := strings.TrimPrefix(trimmed, label)
+		if rest == "" || strings.HasPrefix(rest, ":") || strings.HasPrefix(rest, "：") || strings.HasPrefix(rest, " ") || strings.HasPrefix(rest, "\t") {
+			best = label
+			continue
+		}
+		if (label == "罚款" || label == "记分" || label == "罚款金额") && rest != "" && rest[0] >= '0' && rest[0] <= '9' {
+			best = label
+		}
+	}
+	return best
+}
+
+func inlineTicketValue(label, line string) string {
+	idx := strings.Index(line, label)
+	if idx < 0 {
+		return ""
+	}
+	rest := strings.TrimSpace(line[idx+len(label):])
+	rest = strings.TrimLeft(rest, ":： \t")
+	return strings.TrimSpace(rest)
+}
+
+func continuesLocation(line string) bool {
+	s := strings.TrimSpace(line)
+	if s == "" || matchTicketLabel(s) != "" {
+		return false
+	}
+	if strings.HasPrefix(s, "公里") || strings.HasPrefix(s, "千米") || strings.HasPrefix(s, "米") {
+		return true
+	}
+	return strings.Contains(s, "公里") || strings.Contains(s, "千米") || strings.Contains(s, "高速") || strings.Contains(s, "+")
+}
+
+func ticketLines(full string) []string {
+	raw := foldWidth(strings.ReplaceAll(full, "\r\n", "\n"))
+	var lines []string
+	for _, line := range strings.Split(raw, "\n") {
+		line = strings.TrimSpace(line)
+		if line != "" {
+			lines = append(lines, line)
+		}
+	}
+	return lines
+}
+
+// labeledLocation joins a wrapped 违法地点. "…15" and the next line "公里350米·…" are one place.
+func labeledLocation(full string) string {
+	lines := ticketLines(full)
+	for i, line := range lines {
+		if matchTicketLabel(line) != "违法地点" {
+			continue
+		}
+		var parts []string
+		start := i
+		if inline := inlineTicketValue("违法地点", line); inline != "" {
+			parts = append(parts, inline)
+		} else if i+1 < len(lines) && matchTicketLabel(lines[i+1]) == "" {
+			start = i + 1
+			parts = append(parts, lines[start])
+		}
+		for j := start + 1; j < len(lines); j++ {
+			if matchTicketLabel(lines[j]) != "" || !continuesLocation(lines[j]) {
+				break
+			}
+			parts = append(parts, lines[j])
+		}
+		return strings.Join(parts, "")
+	}
+	return ""
+}
+
+func overlayLine(full string) string {
+	for _, line := range ticketLines(full) {
+		if strings.Contains(line, "地点") && (strings.Contains(line, "K") || strings.Contains(line, "＋")) {
+			return line
+		}
+	}
+	return ""
+}
+
+func stakeScore(s string) int {
+	if strings.TrimSpace(s) == "" {
+		return 0
+	}
+	p := Parse(s)
+	score := len(p.Stakes)*10 + len(p.Glued)*8
+	for _, st := range p.Stakes {
+		if st.Metres != nil {
+			score += 3
+		}
+	}
+	if p.Range && len(p.Stakes) >= 2 {
+		score += 5
+	}
+	if p.Code != "" {
+		score += 1
+	}
+	return score
+}
+
+func stakeFragments(full string) []string {
+	lines := ticketLines(full)
+	var out []string
+	for i, line := range lines {
+		out = append(out, line)
+		if i+1 < len(lines) && matchTicketLabel(lines[i+1]) == "" {
+			out = append(out, line+lines[i+1])
+		}
+	}
+	return out
+}
+
+// richerBody picks the reading that actually contains the pile numbers.
+// A wrapped ticket field ("…15" / "公里350米·…") beats the single truncated line.
+func richerBody(location, full string) string {
+	cands := []string{strings.TrimSpace(location), labeledLocation(full)}
+	cands = append(cands, stakeFragments(full)...)
+	best := ""
+	bestScore := -1
+	for _, c := range cands {
+		c = strings.TrimSpace(c)
+		if c == "" {
+			continue
+		}
+		sc := stakeScore(c)
+		if sc > bestScore || (sc == bestScore && sc > 0 && utf8.RuneCountInString(c) < utf8.RuneCountInString(best)) {
+			best = c
+			bestScore = sc
+		}
+	}
+	if best == "" {
+		return strings.TrimSpace(location)
+	}
+	return best
+}
+
+func richerSources(location, full, overlay string) (string, string) {
+	ov := strings.TrimSpace(overlay)
+	if ov == "" {
+		ov = overlayLine(full)
+	}
+	best := richerBody(location, full)
+	if stakeScore(best) == 0 && stakeScore(ov) > 0 {
+		best = ov
+	}
+	if strings.TrimSpace(best) == "" {
+		best = strings.TrimSpace(location)
+	}
+	if best == "" {
+		best = ov
+	}
+	return best, ov
+}
+
+var chromePhrases = []string{
+	"如对违法无异议", "无需申请陈述和申辩", "请直接处理", "申请陈述和申辩",
+	"加入处理清单", "处理并缴款", "处理清单是空的", "违法处理",
+	"违法车辆", "违法时间", "违法行为", "违法地点", "号牌号码", "罚款金额",
+	"返回", "记分", "罚款", "看地图", "驳回",
+}
+
+func chromeOnly(s string) bool {
+	t := Normalize(s)
+	if t == "" {
+		return true
+	}
+	if reRoadName.MatchString(t) || reStakeKPlus.MatchString(t) || reStakeKM.MatchString(t) || reFacility.MatchString(t) || reCode.MatchString(t) {
+		return false
+	}
+	stripped := t
+	for _, w := range chromePhrases {
+		stripped = strings.ReplaceAll(stripped, w, "")
+	}
+	stripped = regexp.MustCompile(`[\d\s:：,，.。、·\-—–~～_|/\\（）()]+`).ReplaceAllString(stripped, "")
+	return strings.TrimSpace(stripped) == ""
 }
 
 func intPtr(n int) *int { return &n }

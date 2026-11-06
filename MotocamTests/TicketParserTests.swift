@@ -98,6 +98,29 @@ final class TicketParserTests: XCTestCase {
         XCTAssertNil(ticket.penaltyPoints)
     }
 
+    func testSanqingLocationWrapsOntoTheNextLine() {
+        let text = """
+        违法地点
+        三清高速（曲靖三宝－昆明清水）15
+        公里350米·三清高速（曲靖三宝－昆明清水）9公里810米（西向北方向）
+        违法时间
+        2026-08-20 16:13
+        罚款100元 记0分
+        """
+        let ticket = TicketParser.parse(text)
+        XCTAssertEqual(ticket.style, .detail)
+        XCTAssertTrue(ticket.location?.contains("15公里350米") == true)
+        XCTAssertTrue(ticket.location?.contains("9公里810米") == true)
+        XCTAssertFalse(ticket.location?.hasSuffix("15") == true)
+    }
+
+    func testSubmissionStatusUsesApprovedWording() {
+        XCTAssertEqual(SubmissionStatus.label("merged"), "已通过")
+        XCTAssertEqual(SubmissionStatus.label("approved"), "已通过")
+        XCTAssertEqual(SubmissionStatus.label("rejected"), "已驳回")
+        XCTAssertEqual(SubmissionStatus.label("pending"), "审核中")
+    }
+
     func testMissingLocationStaysNil() {
         let ticket = TicketParser.parse("违法行为：超速\n罚款200元")
         XCTAssertTrue(ticket.records.isEmpty)

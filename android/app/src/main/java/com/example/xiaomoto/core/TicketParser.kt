@@ -53,13 +53,20 @@ object TicketParser {
             val line = lines[index]
             val label = matchingLabel(line)
             if (label != null) {
-                val inline = inlineValue(label, line)
-                if (inline.isNotEmpty()) {
-                    values[label] = inline
-                } else if (label in valueLabels && index + 1 < lines.size && matchingLabel(lines[index + 1]) == null) {
-                    values[label] = lines[index + 1]
-                    index += 1
+                var inline = inlineValue(label, line)
+                var next = index
+                if (inline.isEmpty() && label in valueLabels && index + 1 < lines.size && matchingLabel(lines[index + 1]) == null) {
+                    next = index + 1
+                    inline = lines[next]
                 }
+                if (label == "违法地点" && inline.isNotEmpty()) {
+                    while (next + 1 < lines.size && matchingLabel(lines[next + 1]) == null && continuesLocation(lines[next + 1])) {
+                        next += 1
+                        inline += lines[next]
+                    }
+                }
+                if (inline.isNotEmpty()) values[label] = inline
+                index = next
             }
             index += 1
         }
@@ -230,7 +237,40 @@ object TicketParser {
         return ZonedDateTime.of(year, month, day, hour, minute, second, 0, chinaZone()).toInstant()
     }
 
+    private fun continuesLocation(line: String): Boolean {
+        val s = line.trim()
+        if (s.isEmpty() || matchingLabel(s) != null) return false
+        return s.startsWith("公里") || s.startsWith("千米") || s.startsWith("米") ||
+            s.contains("公里") || s.contains("千米") || s.contains("高速") || s.contains("+")
+    }
+
     private fun firstInt(pattern: String, text: String): Int? {
         return Regex(pattern).find(text)?.groupValues?.getOrNull(1)?.toIntOrNull()
+    }
+}
+
+/** Words the uploader sees for a community report. merged is the published status. */
+object SubmissionStatus {
+    fun label(status: String): String = when (status) {
+        "merged", "approved" -> "已通过"
+        "rejected" -> "已驳回"
+        "archived" -> "已归档"
+        else -> "审核中"
+    }
+}
+
+/** Picks stake lines out of a second, magnified OCR pass without dropping the form text. */
+object OCRText {
+    private val stake = Regex("""(?i)K\d{1,4}\s*\+\s*\d{1,4}|\d{1,4}\s*(?:公里|千米|KM)""")
+
+    fun evidence(text: String): Int = stake.findAll(text).count()
+
+    fun merge(primary: String, extra: String): String {
+        if (extra.isBlank()) return primary
+        val add = extra.lines().map { it.trim() }.filter { line ->
+            line.isNotEmpty() && !primary.contains(line) && (line.contains("地点") || evidence(line) > 0)
+        }
+        if (add.isEmpty()) return primary
+        return (primary.trim() + "\n" + add.joinToString("\n")).trim()
     }
 }
