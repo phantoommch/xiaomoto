@@ -19,6 +19,67 @@ func TestImportDeviceIDMatchesScript(t *testing.T) {
 	}
 }
 
+func TestImporterSkipsDuplicateAndUpdatesNotes(t *testing.T) {
+	dir := t.TempDir()
+	dbPath := filepath.Join(dir, "t.db")
+	st, err := Open(dbPath, filepath.Join(dir, "img"), Limits{PromoteMin: 1, PromoteRadiusM: 200, RatePerHour: 20, RatePerDay: 50})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := st.Close(); err != nil {
+		t.Fatal(err)
+	}
+	jsonPath := filepath.Join(dir, "points.json")
+	body := []byte(`{
+  "points": [
+    {"id":"11111111-1111-4111-8111-111111111111","name":"G56 杭瑞高速 K1","type":"camera","road_code":"G56","latitude":25.1,"longitude":101.1,"stake":"K1+000","direction":"大理方向"}
+  ],
+  "updates": [
+    {"id":"11111111-1111-4111-8111-111111111111","direction":"不会覆盖","append_notes":"证据：有官方测速公告 — 示例"}
+  ]
+}`)
+	if err := os.WriteFile(jsonPath, body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	runImport := func() string {
+		t.Helper()
+		out, err := exec.Command("python3", importScriptPath(t), dbPath, jsonPath).CombinedOutput()
+		if err != nil {
+			t.Fatalf("importer: %v %s", err, out)
+		}
+		return string(out)
+	}
+	first := runImport()
+	if !strings.Contains(first, "imported 1") {
+		t.Fatalf("first import: %s", first)
+	}
+	second := runImport()
+	if !strings.Contains(second, "imported 0") || !strings.Contains(second, "skipped 2") {
+		t.Fatalf("second import should skip the id and the already-filled update: %s", second)
+	}
+	near := []byte(`{"points":[{"name":"同一桩号","type":"camera","road_code":"G56","latitude":25.1004,"longitude":101.1004,"stake":"K1+100"}]}`)
+	if err := os.WriteFile(jsonPath, near, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	third := runImport()
+	if !strings.Contains(third, "imported 0") || !strings.Contains(third, "skipped 1") {
+		t.Fatalf("nearby same stake should be skipped: %s", third)
+	}
+	st, err = Open(dbPath, filepath.Join(dir, "img"), Limits{PromoteMin: 1, PromoteRadiusM: 200, RatePerHour: 20, RatePerDay: 50})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { st.Close() })
+	var n int
+	var notes, direction, stake string
+	if err := st.db.QueryRow(`SELECT COUNT(*), notes, direction, stake FROM points`).Scan(&n, &notes, &direction, &stake); err != nil {
+		t.Fatal(err)
+	}
+	if n != 1 || direction != "大理方向" || stake != "K1+000" || !strings.Contains(notes, "有官方测速公告") {
+		t.Fatalf("point count %d notes %q direction %q stake %q", n, notes, direction, stake)
+	}
+}
+
 func TestImporterWritesImportSource(t *testing.T) {
 	dir := t.TempDir()
 	dbPath := filepath.Join(dir, "t.db")
