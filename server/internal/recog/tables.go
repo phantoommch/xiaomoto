@@ -13,6 +13,17 @@ var nameToCode = map[string]string{
 	"杭长": "G6021", "杭金衢": "G60", "申嘉湖": "S12", "苏锡常南部": "S58", "沪常": "S58", "广河": "S2",
 	"成宜昭": "S4", "威砚": "S11", "枣木": "S83", "岚菏": "S38", "芜合": "G5011", "南芜": "G4211",
 	"沪武": "G4221", "淮徐": "G2513", "甬舟": "G9211", "渝黔": "G75", "渝湘": "G65", "合安": "G3",
+	// Signed Yunnan S34 (曲靖三宝–昆明清水). A 2025 Kunming traffic notice
+	// calls the open road “S34三清高速”. Marker hits still have to come back
+	// in Yunnan; see nameProvince.
+	"三清": "S34",
+}
+
+// nameProvince disambiguates a provincial route number. S34 is reused by
+// other provinces, and the kilometre marker is kept only when AMap places it
+// in this province.
+var nameProvince = map[string]string{
+	"三清": "云南",
 }
 
 var provinces = []string{

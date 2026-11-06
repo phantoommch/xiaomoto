@@ -43,6 +43,65 @@ final class RecogTests: XCTestCase {
         XCTAssertEqual(TicketParser.parse(sms).records.count, 1)
     }
 
+    func testSanqingTicketKeepsBothStakes() {
+        let full = """
+        地点:三清高速K15+350M曲靖方向 车道号:02
+        违法行为：驾驶机动车行驶超过规定时速
+        罚款100元 记0分
+        加入处理清单
+        违法地点
+        三清高速（曲靖三宝－昆明清水）15
+        公里350米·三清高速（曲靖三宝－昆明清水）9公里810米（西向北方向）
+        违法时间
+        2026-08-20 16:13
+        申请陈述和申辩
+        处理并缴款
+        """
+        let ticket = TicketParser.parse(full)
+        XCTAssertEqual(ticket.style, .detail)
+        let location = ticket.location ?? ""
+        XCTAssertTrue(location.contains("15公里350米"), location)
+        XCTAssertTrue(location.contains("9公里810米"), location)
+        XCTAssertFalse(location.hasSuffix("15"), location)
+        let parsed = Recog.parse(location)
+        XCTAssertEqual(parsed.code, "S34")
+        XCTAssertEqual(parsed.nameCanon, "三清")
+        XCTAssertEqual(parsed.nameHow, "exact")
+        XCTAssertTrue(parsed.range)
+        XCTAssertEqual(parsed.stakes.count, 2)
+        XCTAssertEqual(parsed.stakes[0].km, 15)
+        XCTAssertEqual(parsed.stakes[0].metres, 350)
+        XCTAssertEqual(parsed.stakes[1].km, 9)
+        XCTAssertEqual(parsed.stakes[1].metres, 810)
+        XCTAssertTrue(parsed.direction?.contains("西向北") == true)
+        let overlay = Recog.signals(full, overlay: "地点:三清高速K15+350M曲靖方向")
+        XCTAssertTrue(overlay.overlay?.code?.isEmpty != false)
+        XCTAssertEqual(overlay.overlay?.km, 15)
+        XCTAssertEqual(overlay.overlay?.metres, 350)
+        XCTAssertTrue(overlay.overlay?.name.contains("三清") == true)
+        XCTAssertTrue(overlay.overlayDir?.contains("曲靖方向") == true)
+        let merged = OCRText.merge(
+            "违法地点\n三清高速（曲靖三宝－昆明清水）15",
+            "地点:三清高速K15+350M曲靖方向\n公里350米·三清高速（曲靖三宝－昆明清水）9公里810米（西向北方向）"
+        )
+        XCTAssertTrue(merged.contains("K15+350"))
+        XCTAssertTrue(merged.contains("9公里810米"))
+        let chrome = "违法处理\n返回\n加入处理清单\n处理并缴款"
+        let located = awaitLocate(chrome)
+        XCTAssertNil(located)
+    }
+
+    private func awaitLocate(_ text: String) -> LocatedPoint? {
+        let exp = expectation(description: "locate")
+        var hit: LocatedPoint?
+        Task {
+            hit = await Recog.locate(text: text, full: text, key: "unused")
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 5)
+        return hit
+    }
+
     func testSegmentDistance() {
         let along = GeoMath.alongSegment(0, 0.001, 0, 0, 0, 0.01)
         XCTAssertGreaterThan(along.fraction, 0)

@@ -3,7 +3,6 @@ package httpapi
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -140,8 +139,11 @@ func decideReview(hit recog.Result, timedOut bool) reviewDecision {
 }
 
 func applyHit(in store.ReportInput, hit recog.Result) store.ReportInput {
-	if blob, err := json.Marshal(hit.Parsed); err == nil && in.ParsedJSON == "" {
+	if blob, err := json.Marshal(hit.Parsed); err == nil {
 		in.ParsedJSON = string(blob)
+	}
+	if hit.Parsed.Norm != "" && (hit.Parsed.Range || len(hit.Parsed.Stakes) > 0) {
+		in.OcrLocation = hit.Parsed.Norm
 	}
 	if hit.Road != "" {
 		in.RoadCode = hit.Road
@@ -153,7 +155,7 @@ func applyHit(in store.ReportInput, hit recog.Result) store.ReportInput {
 		in.Direction = hit.Direction
 	}
 	if hit.HasStake {
-		in.Stake = fmt.Sprintf("K%d+%d", int(hit.StakeKM), hit.StakeM)
+		in.Stake = hit.StakeLabel()
 	}
 	if hit.HasEnd {
 		in.HasEnd = true

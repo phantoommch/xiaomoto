@@ -67,7 +67,46 @@ enum TicketOCR {
         }
         let text = joinLines(observations)
         guard !text.isEmpty else { throw TicketOCRError.empty }
-        return text
+        guard OCRText.evidence(text) == 0, let bigger = magnified(upright) else { return text }
+        let extra = (try? await recognizeObservations(bigger)).map(joinLines) ?? ""
+        return OCRText.merge(text, extra)
+    }
+
+    /// A phone screenshot's burned-in caption is only a few dozen pixels tall.
+    /// A second pass at 2x is used only when the first pass saw no pile number.
+    private static func magnified(_ image: UIImage, maxSide: CGFloat = 2800) -> UIImage? {
+        let longest = max(image.size.width, image.size.height)
+        guard longest > 0, longest < maxSide else { return nil }
+        let scale = min(CGFloat(2), maxSide / longest)
+        guard scale > 1.05 else { return nil }
+        let size = CGSize(width: floor(image.size.width * scale), height: floor(image.size.height * scale))
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        format.opaque = true
+        return UIGraphicsImageRenderer(size: size, format: format).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: size))
+        }
+    }
+
+    private static func recognizeObservations(_ image: UIImage) async throws -> [VNRecognizedTextObservation] {
+        guard let cgImage = image.cgImage else { throw TicketOCRError.unreadable }
+        return try await withCheckedThrowingContinuation { continuation in
+            let once = ResumeBox(continuation)
+            let request = VNRecognizeTextRequest { request, error in
+                if let error {
+                    once.resume(throwing: error)
+                    return
+                }
+                once.resume(returning: (request.results as? [VNRecognizedTextObservation]) ?? [])
+            }
+            request.recognitionLevel = .accurate
+            request.recognitionLanguages = ["zh-Hans", "en-US"]
+            request.usesLanguageCorrection = false
+            let handler = VNImageRequestHandler(cgImage: cgImage, orientation: .up, options: [:])
+            DispatchQueue.global(qos: .userInitiated).async {
+                do { try handler.perform([request]) } catch { once.resume(throwing: error) }
+            }
+        }
     }
 
     static func joinLines(_ observations: [VNRecognizedTextObservation]) -> String {

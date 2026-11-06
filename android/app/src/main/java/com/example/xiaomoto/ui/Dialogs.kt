@@ -45,6 +45,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.xiaomoto.MotoApplication
 import com.example.xiaomoto.core.AmapRequest
 import com.example.xiaomoto.core.EnforcementPoint
+import com.example.xiaomoto.core.OCRText
 import com.example.xiaomoto.core.PlaceCandidate
 import com.example.xiaomoto.core.PlaceRanker
 import com.example.xiaomoto.core.PointSource
@@ -259,7 +260,20 @@ fun TicketDialog(onDismiss: () -> Unit, onRecognized: (List<com.example.xiaomoto
             return@rememberLauncherForActivityResult
         }
         Thread {
-            val outcome = runCatching { ChineseOcr.recognize(context.applicationContext, bitmap) }
+            val outcome = runCatching {
+                val first = ChineseOcr.recognize(context.applicationContext, bitmap)
+                if (OCRText.evidence(first) > 0) {
+                    first
+                } else {
+                    val big = ImageTools.magnify(bitmap)
+                    try {
+                        val extra = runCatching { ChineseOcr.recognize(context.applicationContext, big) }.getOrDefault("")
+                        OCRText.merge(first, extra)
+                    } finally {
+                        if (big !== bitmap) big.recycle()
+                    }
+                }
+            }
             val jpeg = runCatching { ImageTools.jpeg(bitmap) }.getOrNull()
             android.os.Handler(android.os.Looper.getMainLooper()).post {
                 busy = false

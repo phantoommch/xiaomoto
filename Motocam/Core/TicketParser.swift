@@ -49,13 +49,20 @@ enum TicketParser {
         while index < lines.count {
             let line = lines[index]
             if let label = matchingLabel(line) {
-                let inline = inlineValue(after: label, in: line)
-                if !inline.isEmpty {
-                    values[label] = inline
-                } else if valueLabels.contains(label), index + 1 < lines.count, matchingLabel(lines[index + 1]) == nil {
-                    values[label] = lines[index + 1]
-                    index += 1
+                var inline = inlineValue(after: label, in: line)
+                var next = index
+                if inline.isEmpty, valueLabels.contains(label), index + 1 < lines.count, matchingLabel(lines[index + 1]) == nil {
+                    next = index + 1
+                    inline = lines[next]
                 }
+                if label == "违法地点", !inline.isEmpty {
+                    while next + 1 < lines.count, matchingLabel(lines[next + 1]) == nil, continuesLocation(lines[next + 1]) {
+                        next += 1
+                        inline += lines[next]
+                    }
+                }
+                if !inline.isEmpty { values[label] = inline }
+                index = next
             }
             index += 1
         }
@@ -195,6 +202,12 @@ enum TicketParser {
         return String(rest).trimmingCharacters(in: .whitespaces)
     }
 
+    private static func continuesLocation(_ line: String) -> Bool {
+        let s = line.trimmingCharacters(in: .whitespaces)
+        if s.isEmpty || matchingLabel(s) != nil { return false }
+        return s.hasPrefix("公里") || s.hasPrefix("千米") || s.hasPrefix("米") || s.contains("公里") || s.contains("千米") || s.contains("高速") || s.contains("+")
+    }
+
     private static func cleaned(_ value: String?) -> String? {
         guard let value else { return nil }
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -246,5 +259,26 @@ enum TicketParser {
               let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
               let range = Range(match.range(at: 1), in: text) else { return nil }
         return Int(text[range])
+    }
+}
+
+/// Picks stake lines out of a second, magnified OCR pass without dropping the form text.
+enum OCRText {
+    private static let stake = try? NSRegularExpression(pattern: "(?i)K\\d{1,4}\\s*\\+\\s*\\d{1,4}|\\d{1,4}\\s*(?:公里|千米|KM)")
+
+    static func evidence(_ text: String) -> Int {
+        guard let stake else { return 0 }
+        return stake.numberOfMatches(in: text, range: NSRange(text.startIndex..., in: text))
+    }
+
+    static func merge(_ primary: String, _ extra: String) -> String {
+        let trimmed = extra.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty { return primary }
+        let add = trimmed.components(separatedBy: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { line in
+            !line.isEmpty && !primary.contains(line) && (line.contains("地点") || evidence(line) > 0)
+        }
+        if add.isEmpty { return primary }
+        return (primary.trimmingCharacters(in: .whitespacesAndNewlines) + "\n" + add.joined(separator: "\n"))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

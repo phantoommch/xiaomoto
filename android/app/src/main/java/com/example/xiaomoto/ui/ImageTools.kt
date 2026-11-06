@@ -51,6 +51,17 @@ object ImageTools {
         return out
     }
 
+    /** Magnifies a screenshot so the burned-in camera caption is large enough to read. */
+    fun magnify(source: Bitmap, maxSide: Int = 2800): Bitmap {
+        val longest = max(source.width, source.height)
+        if (longest <= 0 || longest >= maxSide) return source
+        val scale = min(2.0, maxSide.toDouble() / longest)
+        if (scale <= 1.05) return source
+        val width = (source.width * scale).roundToInt().coerceAtLeast(1)
+        val height = (source.height * scale).roundToInt().coerceAtLeast(1)
+        return Bitmap.createScaledBitmap(source, width, height, true)
+    }
+
     fun jpeg(bitmap: Bitmap, quality: Int = 82): ByteArray {
         val stream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream)

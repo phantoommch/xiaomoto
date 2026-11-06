@@ -492,6 +492,52 @@ class TicketParserTest {
         assertNull(ticket.violation)
         assertNull(ticket.penaltyPoints)
     }
+
+    @Test fun sanqingTicketKeepsBothStakesAndTheRoad() {
+        val full = """
+            地点:三清高速K15+350M曲靖方向 车道号:02
+            违法行为：驾驶机动车行驶超过规定时速
+            罚款100元 记0分
+            加入处理清单
+            违法地点
+            三清高速（曲靖三宝－昆明清水）15
+            公里350米·三清高速（曲靖三宝－昆明清水）9公里810米（西向北方向）
+            违法时间
+            2026-08-20 16:13
+            申请陈述和申辩
+            处理并缴款
+        """.trimIndent()
+        val ticket = TicketParser.parse(full)
+        assertEquals(TicketStyle.DETAIL, ticket.style)
+        val location = ticket.location ?: ""
+        assertTrue(location.contains("15公里350米"), location)
+        assertTrue(location.contains("9公里810米"), location)
+        assertFalse(location.endsWith("15"), location)
+        val parsed = Recog.parse(location)
+        assertEquals("S34", parsed.code)
+        assertEquals("三清", parsed.nameCanon)
+        assertEquals("exact", parsed.nameHow)
+        assertTrue(parsed.range)
+        assertEquals(2, parsed.stakes.size)
+        assertEquals(15.0, parsed.stakes[0].km)
+        assertEquals(350, parsed.stakes[0].metres)
+        assertEquals(9.0, parsed.stakes[1].km)
+        assertEquals(810, parsed.stakes[1].metres)
+        assertTrue(parsed.direction.orEmpty().contains("西向北"))
+        val overlay = Recog.signals(full, "地点:三清高速K15+350M曲靖方向")
+        assertNull(overlay.overlay?.code)
+        assertEquals(15.0, overlay.overlay?.km)
+        assertEquals(350, overlay.overlay?.metres)
+        assertTrue(overlay.overlay?.name.orEmpty().contains("三清"))
+        assertTrue(overlay.overlayDir.orEmpty().contains("曲靖方向"))
+        val merged = OCRText.merge(
+            "违法地点\n三清高速（曲靖三宝－昆明清水）15",
+            "地点:三清高速K15+350M曲靖方向\n公里350米·三清高速（曲靖三宝－昆明清水）9公里810米（西向北方向）",
+        )
+        assertTrue(merged.contains("K15+350"))
+        assertTrue(merged.contains("9公里810米"))
+        assertNull(Recog.locate("违法处理\n返回\n加入处理清单\n处理并缴款", "违法处理\n返回\n加入处理清单\n处理并缴款", "unused"))
+    }
 }
 
 class PointCodecTest {
