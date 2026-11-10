@@ -67,6 +67,7 @@ func main() {
 		DevMode:          cfg.AuthDev,
 		ReviewEmail:      cfg.ReviewEmail,
 		ReviewCode:       cfg.ReviewCode,
+		ReviewPassword:   cfg.ReviewPassword,
 		TermsPath:        termsPath,
 		TermsVersion:     cfg.TermsVersion,
 		Mail:             cfg.Mail,

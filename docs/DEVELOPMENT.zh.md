@@ -94,7 +94,7 @@ xcrun devicectl device install app --device <udid> \
   "$HOME/Library/Developer/Xcode/DerivedData/Motocam/Build/Products/Debug-iphoneos/Motocam.app"
 ```
 
-也可以在 Xcode 里选这台 iPhone，直接 Run。签名是 Automatic，`DEVELOPMENT_TEAM` 来自 `Config/Shared.xcconfig`（命令行上的同名参数会盖掉它）。工程没有单独的 entitlements 文件：后台定位和语音只写在 `Info.plist` 的 `UIBackgroundModes`，没有推送、Associated Domains 这类要付费团队的能力。选罚单截图用的是系统 PhotosPicker，不申请整个相册权限，所以没有 `NSPhotoLibraryUsageDescription`。
+也可以在 Xcode 里选这台 iPhone，直接 Run。签名是 Automatic，`DEVELOPMENT_TEAM` 来自 `Config/Shared.xcconfig`（命令行上的同名参数会盖掉它）。工程没有单独的 entitlements 文件：后台定位只写在 `Info.plist` 的 `UIBackgroundModes`（`location`）。不要再加入 `audio`，否则会再次被 Guideline 2.5.4 拒绝。没有推送、Associated Domains 这类要付费团队的能力。选罚单截图用的是系统 PhotosPicker，不申请整个相册权限，所以没有 `NSPhotoLibraryUsageDescription`。
 
 要导出 ad-hoc 安装包时，先把 `ExportOptions.plist` 里的 `teamID` 换成你自己的 Team ID（仓库里是占位符 `YOUR_APPLE_TEAM_ID`）。某些 Xcode beta 在 Release 归档时编译器会崩溃，可以改用 Debug 归档再导出：
 
@@ -139,7 +139,7 @@ DEVELOPMENT_TEAM = YOUR_APPLE_TEAM_ID
 
 ### 后台定位要怎么授权
 
-骑行提醒需要「始终」定位。`Info.plist` 的 `UIBackgroundModes` 有 `location` 和 `audio`：锁屏后继续算距离，语音只在一条提醒播出时打开音频会话，念完就关掉。系统弹出的说明就是这两段：
+骑行提醒需要「始终」定位。`Info.plist` 的 `UIBackgroundModes` 只有 `location`：锁屏后继续算距离。语音仍可在前台或被定位唤醒时播放，锁屏覆盖靠通知和振动。不要把 `audio` 加回 `UIBackgroundModes`。系统弹出的说明就是这两段：
 
 - 使用期间：小moto安全驾驶指南用你的位置在地图上标出当前位置，并计算和已记录的禁摩收费站、禁摩路段、抓拍点之间的距离。
 - 始终：小moto安全驾驶指南在骑行时即使锁屏或切换到其他 App，也需要持续定位，以便在约 2 公里和 500 米处发出语音和通知。定位只在本机用来判断距离，不会上传行驶轨迹。
@@ -350,7 +350,7 @@ curl -X POST https://example.invalid/v1/admin/app \
 1. 安装 Docker。国内机器拉 `golang` / `debian` 镜像可能要配镜像加速。
 2. 在仓库根目录设置 `ADMIN_TOKEN`，执行 `docker compose up -d --build`。
 3. 前面加 Nginx 或 Caddy，只暴露 HTTPS。iOS 不再设置 `NSAllowsArbitraryLoads`，只走系统默认的 HTTPS。
-4. 把服务器根地址写进 Android 的 `COMMUNITY_API_BASE_URL`，或 iOS 的 `Config/Shared.xcconfig`。不要带路径。iOS 设置里不能改这个地址。Android 设置页长按标题约 3 秒可以改。这个地址要和 `PUBLIC_BASE_URL` 相同，点位下载用它。Android 检查更新也用它。
+4. 把服务器根地址写进 Android 的 `COMMUNITY_API_BASE_URL`，或 iOS 的 `Config/Shared.xcconfig`。签名工程里的正式地址是 `https://api.xiaomoto.cloud`，不要写成下载域名 `https://dl.xiaomoto.cloud`，也不要在根地址后面再加路径。iOS 设置里不能改这个地址。Android 设置页长按标题约 3 秒可以改。这个地址要和 `PUBLIC_BASE_URL` 相同，点位下载用它。Android 检查更新也用它。签名工程的密码登录、重置密码、设置密码分别是 `POST /v1/auth/login-password`、`POST /v1/auth/reset-password`、`POST /v1/auth/set-password`。现网库已有 `password_hash` 和 `password_set_at`。这三路用 2026-10-03 的 bcrypt 实现接回当前服务端，口令算法不变。客户端路径不要改。部署前先备份数据库；启动时若列已存在不会再改表。
 
 在中国大陆**对公众**提供用户上传服务，需要 ICP 备案，以及和主体匹配的许可。个人开发者可以先把服务放在只有自己能访问的机器上试用，不一定先备案。备案完成前不要把地址写进公开发布的安装包。
 

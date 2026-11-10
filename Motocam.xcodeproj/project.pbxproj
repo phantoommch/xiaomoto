@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		A77D0E11C4B29F8031E6AA02 /* AppUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77D0E11C4B29F8031E6AA01 /* AppUpdate.swift */; };
 		A77D0E11C4B29F8031E6AA04 /* AppUpdateLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77D0E11C4B29F8031E6AA03 /* AppUpdateLink.swift */; };
+		A11A0000000000000000A002 /* AuthRoutes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11A0000000000000000A001 /* AuthRoutes.swift */; };
+		A11A0000000000000000A004 /* AuthLoginRouteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11A0000000000000000A003 /* AuthLoginRouteTests.swift */; };
 		A77D0E11C4B29F8031E6BB02 /* SyncNotice.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77D0E11C4B29F8031E6BB01 /* SyncNotice.swift */; };
 		A77D0E11C4B29F8031E6BB04 /* SyncNoticeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77D0E11C4B29F8031E6BB03 /* SyncNoticeTests.swift */; };
 		EF769E5F69426F44A6856F12 /* AmapClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F8597BDB942C8BA170C6360 /* AmapClient.swift */; };
@@ -72,6 +74,8 @@
 		9F8597BDB942C8BA170C6360 /* AmapClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmapClient.swift; sourceTree = "<group>"; };
 		A77D0E11C4B29F8031E6AA01 /* AppUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdate.swift; sourceTree = "<group>"; };
 		A77D0E11C4B29F8031E6AA03 /* AppUpdateLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateLink.swift; sourceTree = "<group>"; };
+		A11A0000000000000000A001 /* AuthRoutes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRoutes.swift; sourceTree = "<group>"; };
+		A11A0000000000000000A003 /* AuthLoginRouteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthLoginRouteTests.swift; sourceTree = "<group>"; };
 		A77D0E11C4B29F8031E6BB01 /* SyncNotice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncNotice.swift; sourceTree = "<group>"; };
 		A77D0E11C4B29F8031E6BB03 /* SyncNoticeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncNoticeTests.swift; sourceTree = "<group>"; };
 		DA9BF198D331FEDC620A9566 /* CommunityClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityClient.swift; sourceTree = "<group>"; };
@@ -171,6 +175,7 @@
 			children = (
 				1A3A26AA058796A2983CC4A2 /* AlertEngine.swift */,
 				A77D0E11C4B29F8031E6AA03 /* AppUpdateLink.swift */,
+				A11A0000000000000000A001 /* AuthRoutes.swift */,
 				A77D0E11C4B29F8031E6BB01 /* SyncNotice.swift */,
 				2059478A19AF3AC4C4EAE8AE /* AmapRequest.swift */,
 				BADD601140E4AB53D6710B72 /* AppIdentity.swift */,
@@ -234,6 +239,7 @@
 			children = (
 				FF08374C920436D2FA3D789A /* AlertEngineTests.swift */,
 				A77D0E11C4B29F8031E6AA05 /* AppUpdateLinkTests.swift */,
+				A11A0000000000000000A003 /* AuthLoginRouteTests.swift */,
 				A77D0E11C4B29F8031E6BB03 /* SyncNoticeTests.swift */,
 				A5CD2DE12648295BCF4A28B7 /* CoordinateConverterTests.swift */,
 				91D1731D672714D4ACB56F2F /* PointCodecTests.swift */,
@@ -384,6 +390,7 @@
 				F2EB75CDE712EEB0AE6FD180 /* TicketOCR.swift in Sources */,
 				A37F50DECB9ED7AF2ABF7F9E /* AlertEngine.swift in Sources */,
 				A77D0E11C4B29F8031E6AA04 /* AppUpdateLink.swift in Sources */,
+				A11A0000000000000000A002 /* AuthRoutes.swift in Sources */,
 				A77D0E11C4B29F8031E6BB02 /* SyncNotice.swift in Sources */,
 				A71FA40704CE2B82DC48206A /* AmapRequest.swift in Sources */,
 				21B200C8396EC132C9328908 /* AppIdentity.swift in Sources */,
@@ -418,6 +425,7 @@
 			files = (
 				4A4D6C745AEC0A201D7F31D6 /* AlertEngineTests.swift in Sources */,
 				A77D0E11C4B29F8031E6AA06 /* AppUpdateLinkTests.swift in Sources */,
+				A11A0000000000000000A004 /* AuthLoginRouteTests.swift in Sources */,
 				A77D0E11C4B29F8031E6BB04 /* SyncNoticeTests.swift in Sources */,
 				2F2C04AD8D9D722E1F4F3817 /* CoordinateConverterTests.swift in Sources */,
 				9CB57AB33F49F97CBD9F7836 /* PointCodecTests.swift in Sources */,
@@ -507,7 +515,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Motocam/Motocam.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 40;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -542,7 +550,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Motocam/Motocam.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 40;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -575,7 +583,7 @@
 
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 40;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
@@ -597,7 +605,7 @@
 
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 40;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
