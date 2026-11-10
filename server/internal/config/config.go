@@ -21,6 +21,7 @@ type Config struct {
 	AuthDev        bool
 	ReviewEmail    string
 	ReviewCode     string
+	ReviewPassword string
 	TermsVersion   string
 	Mail           mail.Config
 	AmapKey        string
@@ -40,6 +41,7 @@ func FromEnv() Config {
 		AuthDev:        envBool("AUTH_DEV"),
 		ReviewEmail:    strings.ToLower(strings.TrimSpace(os.Getenv("REVIEW_EMAIL"))),
 		ReviewCode:     strings.TrimSpace(os.Getenv("REVIEW_CODE")),
+		ReviewPassword: strings.TrimSpace(os.Getenv("REVIEW_PASSWORD")),
 		TermsVersion:   strings.TrimSpace(os.Getenv("TERMS_VERSION")),
 		AmapKey:        strings.TrimSpace(os.Getenv("AMAP_KEY")),
 		Mail: mail.Config{

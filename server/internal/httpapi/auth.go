@@ -23,12 +23,13 @@ type mailer interface {
 }
 
 type authSettings struct {
-	dev          bool
-	reviewEmail  string
-	reviewCode   string
-	termsPath    string
-	termsVersion string
-	mail         mail.Config
+	dev            bool
+	reviewEmail    string
+	reviewCode     string
+	reviewPassword string
+	termsPath      string
+	termsVersion   string
+	mail           mail.Config
 }
 
 var devCodes sync.Map
@@ -134,6 +135,7 @@ func (s *Server) me(w http.ResponseWriter, r *http.Request) {
 		"termsVersion":  user.TermsVersionAccepted,
 		"termsCurrent":  terms.Version,
 		"termsAccepted": user.TermsVersionAccepted == terms.Version,
+		"hasPassword":   s.userHasPassword(user),
 	})
 }
 

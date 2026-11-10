@@ -40,6 +40,7 @@ type HandlerOptions struct {
 	DevMode          bool
 	ReviewEmail      string
 	ReviewCode       string
+	ReviewPassword   string
 	TermsPath        string
 	TermsVersion     string
 	Mail             mail.Config
@@ -77,12 +78,13 @@ func NewWithOptions(opts HandlerOptions) http.Handler {
 		apps:          opts.Apps,
 		publicBase:    strings.TrimRight(strings.TrimSpace(opts.PublicBase), "/"),
 		auth: authSettings{
-			dev:          opts.DevMode,
-			reviewEmail:  strings.ToLower(strings.TrimSpace(opts.ReviewEmail)),
-			reviewCode:   strings.TrimSpace(opts.ReviewCode),
-			termsPath:    opts.TermsPath,
-			termsVersion: strings.TrimSpace(opts.TermsVersion),
-			mail:         opts.Mail,
+			dev:            opts.DevMode,
+			reviewEmail:    strings.ToLower(strings.TrimSpace(opts.ReviewEmail)),
+			reviewCode:     strings.TrimSpace(opts.ReviewCode),
+			reviewPassword: strings.TrimSpace(opts.ReviewPassword),
+			termsPath:      opts.TermsPath,
+			termsVersion:   strings.TrimSpace(opts.TermsVersion),
+			mail:           opts.Mail,
 		},
 		amapKey:       strings.TrimSpace(opts.AmapKey),
 		locate:        opts.Locate,
@@ -101,6 +103,9 @@ func NewWithOptions(opts HandlerOptions) http.Handler {
 	mux.HandleFunc("POST /v1/auth/request-code", s.requestCode)
 	mux.HandleFunc("POST /v1/auth/verify", s.verifyCode)
 	mux.HandleFunc("POST /v1/auth/logout", s.logout)
+	mux.HandleFunc("POST /v1/auth/login-password", s.loginPassword)
+	mux.HandleFunc("POST /v1/auth/reset-password", s.resetPassword)
+	mux.HandleFunc("POST /v1/auth/set-password", s.setPassword)
 	mux.HandleFunc("GET /v1/me", s.me)
 	mux.HandleFunc("GET /v1/me/reports", s.myReports)
 	mux.HandleFunc("DELETE /v1/me", s.deleteMe)
