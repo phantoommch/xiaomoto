@@ -13,6 +13,10 @@ import (
 
 var ErrDisabled = errors.New("disabled")
 
+// ErrPassword is a failed password check. Callers must not turn it into a
+// 404, and must not create a user because of it.
+var ErrPassword = errors.New("password")
+
 const (
 	codeTTL         = 10 * time.Minute
 	maxCodeAttempts = 5
@@ -222,6 +226,83 @@ INSERT INTO sessions (token_hash, user_id, created_at, expires_at) VALUES (?, ?,
 		return User{}, "", time.Time{}, err
 	}
 	return user, raw, expires, nil
+}
+
+// LoginWithPassword checks an existing password. It does not create a user,
+// send mail, or accept a review code in place of the password.
+func (s *Store) LoginWithPassword(email, password string, now time.Time) (User, string, time.Time, error) {
+	email = normalizeEmail(email)
+	const dummySalt = "00000000000000000000000000000000"
+	probe := hashSecret(dummySalt, password)
+	var user User
+	var disabled int
+	var storedHash, salt string
+	err := s.db.QueryRow(`
+SELECT id, email, terms_version_accepted, disabled, password_hash, password_salt
+FROM users WHERE email=?`, email).Scan(&user.ID, &user.Email, &user.TermsVersionAccepted, &disabled, &storedHash, &salt)
+	if err == sql.ErrNoRows {
+		subtle.ConstantTimeCompare([]byte(probe), []byte(hashSecret(dummySalt, "no-such-user")))
+		return User{}, "", time.Time{}, ErrPassword
+	}
+	if err != nil {
+		return User{}, "", time.Time{}, err
+	}
+	got := probe
+	if salt != "" {
+		got = hashSecret(salt, password)
+	}
+	if storedHash == "" || salt == "" || subtle.ConstantTimeCompare([]byte(got), []byte(storedHash)) != 1 {
+		return User{}, "", time.Time{}, ErrPassword
+	}
+	if disabled != 0 {
+		return User{}, "", time.Time{}, ErrDisabled
+	}
+	raw, hash, err := newToken()
+	if err != nil {
+		return User{}, "", time.Time{}, err
+	}
+	stamp := now.UTC().Format(time.RFC3339)
+	expires := now.UTC().Add(sessionTTL)
+	tx, err := s.db.Begin()
+	if err != nil {
+		return User{}, "", time.Time{}, err
+	}
+	defer tx.Rollback()
+	if _, err := tx.Exec(`UPDATE users SET last_login_at=? WHERE id=?`, stamp, user.ID); err != nil {
+		return User{}, "", time.Time{}, err
+	}
+	if _, err := tx.Exec(`
+INSERT INTO sessions (token_hash, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)`,
+		hash, user.ID, stamp, expires.Format(time.RFC3339)); err != nil {
+		return User{}, "", time.Time{}, err
+	}
+	if err := tx.Commit(); err != nil {
+		return User{}, "", time.Time{}, err
+	}
+	return user, raw, expires, nil
+}
+
+// SetPassword stores a new password for an existing user. It does not create
+// an account and does not send mail.
+func (s *Store) SetPassword(userID, password string) error {
+	if userID == "" {
+		return ErrNotFound
+	}
+	salt, err := randomHex(16)
+	if err != nil {
+		return err
+	}
+	res, err := s.db.Exec(`
+UPDATE users SET password_hash=?, password_salt=? WHERE id=? AND disabled=0`,
+		hashSecret(salt, password), salt, userID)
+	if err != nil {
+		return err
+	}
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
 func (s *Store) UserByToken(token string, now time.Time) (User, error) {

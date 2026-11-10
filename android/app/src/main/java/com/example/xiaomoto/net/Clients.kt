@@ -1,5 +1,7 @@
 package com.example.xiaomoto.net
 
+import com.example.xiaomoto.core.APIPath
+import com.example.xiaomoto.core.APIURL
 import com.example.xiaomoto.core.AmapRequest
 import com.example.xiaomoto.core.CoordinateConverter
 import com.example.xiaomoto.core.EnforcementPoint
@@ -135,7 +137,7 @@ object CommunityClient {
     private const val PAGE_LIMIT = 5000
 
     fun submit(baseUrl: String, deviceId: String, point: EnforcementPoint, imageJpeg: ByteArray?): JSONObject {
-        val url = endpoint(baseUrl, "v1/reports")
+        val url = endpoint(baseUrl, APIPath.reports)
         val connection = (URL(url).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             connectTimeout = 40_000
@@ -198,7 +200,7 @@ object CommunityClient {
     )
 
     private fun fetchPage(baseUrl: String, since: String?): Page {
-        val root = endpoint(baseUrl, "v1/points")
+        val root = endpoint(baseUrl, APIPath.points)
         val query = buildString {
             append("limit=").append(PAGE_LIMIT)
             if (!since.isNullOrBlank()) {
@@ -330,13 +332,8 @@ object CommunityClient {
     }
 
     private fun endpoint(raw: String, path: String): String {
-        var trimmed = raw.trim()
-        if (trimmed.isEmpty()) throw CommunityException("还没有填写社区服务器地址。不填也可以离线使用本机点位。")
-        while (trimmed.endsWith("/")) trimmed = trimmed.dropLast(1)
-        if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
-            throw CommunityException("社区服务器地址无效。")
-        }
-        return "$trimmed/$path"
+        if (raw.trim().isEmpty()) throw CommunityException("还没有填写社区服务器地址。不填也可以离线使用本机点位。")
+        return APIURL.resolve(raw, path) ?: throw CommunityException("社区服务器地址无效。")
     }
 
     private fun readJson(connection: HttpURLConnection): JSONObject {

@@ -58,7 +58,7 @@ enum CommunityClient {
     }
 
     static func myReports(baseURL: String) async throws -> [MyReport] {
-        let root = try endpoint(baseURL, "v1/me/reports")
+        let root = try endpoint(baseURL, APIPath.myReports)
         var request = URLRequest(url: root)
         request.httpMethod = "GET"
         request.timeoutInterval = 20
@@ -72,7 +72,7 @@ enum CommunityClient {
         point: EnforcementPoint,
         imageJPEG: Data?
     ) async throws -> CommunitySubmitResult {
-        let root = try endpoint(baseURL, "v1/reports")
+        let root = try endpoint(baseURL, APIPath.reports)
         var request = URLRequest(url: root)
         request.httpMethod = "POST"
         request.timeoutInterval = 40
@@ -128,7 +128,7 @@ enum CommunityClient {
     private static let pageLimit = 5000
 
     private static func fetchPage(baseURL: String, since: String?) async throws -> ListEnvelope {
-        let root = try endpoint(baseURL, "v1/points")
+        let root = try endpoint(baseURL, APIPath.points)
         var components = URLComponents(url: root, resolvingAgainstBaseURL: false)
         var items = [URLQueryItem(name: "limit", value: String(pageLimit))]
         if let since, !since.isEmpty {
@@ -144,12 +144,8 @@ enum CommunityClient {
     }
 
     private static func endpoint(_ raw: String, _ path: String) throws -> URL {
-        var trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { throw CommunityClientError.notConfigured }
-        while trimmed.hasSuffix("/") { trimmed.removeLast() }
-        guard let url = URL(string: trimmed + "/" + path), url.scheme == "http" || url.scheme == "https" else {
-            throw CommunityClientError.badURL
-        }
+        guard !raw.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw CommunityClientError.notConfigured }
+        guard let url = APIURL.resolve(raw, path) else { throw CommunityClientError.badURL }
         return url
     }
 

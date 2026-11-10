@@ -6,7 +6,9 @@ struct LoginView: View {
 
     var hint: String?
     @State private var email = ""
+    @State private var password = ""
     @State private var code = ""
+    @State private var codeMode = false
     @State private var agreed = false
     @State private var termsVersion = "1.0"
     @State private var termsMarkdown = ""
@@ -29,18 +31,22 @@ struct LoginView: View {
                         .textInputAutocapitalization(.never)
                         .keyboardType(.emailAddress)
                         .autocorrectionDisabled()
-                    Button(cooldown > 0 ? "\(cooldown) 秒后可重发" : "获取激活码") {
-                        Task { await requestCode() }
-                    }
-                    .disabled(busy || cooldown > 0 || !email.contains("@"))
-                    TextField("6 位激活码", text: $code)
-                        .keyboardType(.numberPad)
-                        .onChange(of: code) { _, value in
-                            let digits = value.filter(\.isNumber)
-                            if digits != value || digits.count > 6 {
-                                code = String(digits.prefix(6))
-                            }
+                    if codeMode {
+                        Button(cooldown > 0 ? "\(cooldown) 秒后可重发" : "获取激活码") {
+                            Task { await requestCode() }
                         }
+                        .disabled(busy || cooldown > 0 || !email.contains("@"))
+                        TextField("6 位激活码", text: $code)
+                            .keyboardType(.numberPad)
+                            .onChange(of: code) { _, value in
+                                let digits = value.filter(\.isNumber)
+                                if digits != value || digits.count > 6 {
+                                    code = String(digits.prefix(6))
+                                }
+                            }
+                    } else {
+                        SecureField("密码", text: $password)
+                    }
                 }
                 Section {
                     Toggle("我已阅读并同意《用户协议与免责声明》", isOn: $agreed)
@@ -54,10 +60,35 @@ struct LoginView: View {
                     }
                 }
                 Section {
-                    Button("注册 / 登录") {
-                        Task { await verify() }
+                    if codeMode {
+                        Button("注册 / 登录") {
+                            Task { await verify() }
+                        }
+                        .disabled(busy || !agreed || code.count != 6)
+                        Button("用密码登录") {
+                            codeMode = false
+                            message = nil
+                        }
+                    } else {
+                        Button("登录") {
+                            Task { await passwordLogin() }
+                        }
+                        .disabled(busy || !agreed || !email.contains("@") || password.isEmpty)
+                        Text("请填写邮箱和密码，并勾选同意用户协议后再登录。")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                        Button("用验证码登录 / 注册") {
+                            codeMode = true
+                            message = nil
+                        }
+                        Button("忘记密码") {
+                            codeMode = true
+                            message = nil
+                        }
+                        Text("第一次用请点「用验证码登录 / 注册」。收到邮件里的验证码，登录后再设置密码。")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     }
-                    .disabled(busy || !agreed || code.count != 6)
                 }
                 if let message {
                     Section {
@@ -65,7 +96,7 @@ struct LoginView: View {
                     }
                 }
             }
-            .navigationTitle("注册 / 登录")
+            .navigationTitle(codeMode ? "注册 / 登录" : "登录")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -100,6 +131,22 @@ struct LoginView: View {
             try await AuthClient.requestCode(baseURL: settings.communityBaseURL, email: email.trimmingCharacters(in: .whitespacesAndNewlines))
             message = "激活码已发送，请查看邮箱。"
             startCooldown()
+        } catch {
+            message = error.localizedDescription
+        }
+    }
+
+    private func passwordLogin() async {
+        busy = true
+        defer { busy = false }
+        do {
+            let logged = try await AuthClient.passwordLogin(
+                baseURL: settings.communityBaseURL,
+                email: email.trimmingCharacters(in: .whitespacesAndNewlines),
+                password: password
+            )
+            session.adopt(logged)
+            _ = await UploadQueue.flush(settings: settings)
         } catch {
             message = error.localizedDescription
         }

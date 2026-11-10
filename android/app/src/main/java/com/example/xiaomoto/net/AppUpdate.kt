@@ -8,6 +8,8 @@ import android.provider.Settings
 import androidx.core.content.FileProvider
 import com.example.xiaomoto.BuildConfig
 import com.example.xiaomoto.MotoApplication
+import com.example.xiaomoto.core.APIPath
+import com.example.xiaomoto.core.APIURL
 import com.example.xiaomoto.core.AppRelease
 import java.io.File
 import java.net.HttpURLConnection
@@ -137,7 +139,7 @@ object AppUpdateController {
 
 object AppUpdateClient {
     fun latest(baseUrl: String): AppRelease? {
-        val connection = open(baseUrl.trimEnd('/') + "/v1/app/latest?platform=android")
+        val connection = open(APIURL.resolve(baseUrl, APIPath.appLatestAndroid) ?: throw AppUpdateException("服务器地址无效"))
         try {
             val code = connection.responseCode
             val stream = if (code in 200..299) connection.inputStream else connection.errorStream
