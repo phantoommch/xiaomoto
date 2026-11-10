@@ -350,7 +350,7 @@ curl -X POST https://example.invalid/v1/admin/app \
 1. 安装 Docker。国内机器拉 `golang` / `debian` 镜像可能要配镜像加速。
 2. 在仓库根目录设置 `ADMIN_TOKEN`，执行 `docker compose up -d --build`。
 3. 前面加 Nginx 或 Caddy，只暴露 HTTPS。iOS 不再设置 `NSAllowsArbitraryLoads`，只走系统默认的 HTTPS。
-4. 把服务器根地址写进 Android 的 `COMMUNITY_API_BASE_URL`，或 iOS 的 `Config/Shared.xcconfig`。签名工程里的正式地址是 `https://api.xiaomoto.cloud`，不要写成下载域名 `https://dl.xiaomoto.cloud`，也不要在根地址后面再加路径。iOS 设置里不能改这个地址。Android 设置页长按标题约 3 秒可以改。这个地址要和 `PUBLIC_BASE_URL` 相同，点位下载用它。Android 检查更新也用它。签名工程的密码登录、重置密码、设置密码分别是 `POST /v1/auth/login-password`、`POST /v1/auth/reset-password`、`POST /v1/auth/set-password`。这三路在 `api.xiaomoto.cloud` 上仍是 404。现网库已有 `password_hash` 和 `password_set_at`，但本 Git 历史里没有这两列，也没有对应路由。客户端路径先不要改，也不要另写一套口令算法。
+4. 把服务器根地址写进 Android 的 `COMMUNITY_API_BASE_URL`，或 iOS 的 `Config/Shared.xcconfig`。签名工程里的正式地址是 `https://api.xiaomoto.cloud`，不要写成下载域名 `https://dl.xiaomoto.cloud`，也不要在根地址后面再加路径。iOS 设置里不能改这个地址。Android 设置页长按标题约 3 秒可以改。这个地址要和 `PUBLIC_BASE_URL` 相同，点位下载用它。Android 检查更新也用它。签名工程的密码登录、重置密码、设置密码分别是 `POST /v1/auth/login-password`、`POST /v1/auth/reset-password`、`POST /v1/auth/set-password`。现网库已有 `password_hash` 和 `password_set_at`。这三路用 2026-10-03 的 bcrypt 实现接回当前服务端，口令算法不变。客户端路径不要改。部署前先备份数据库；启动时若列已存在不会再改表。
 
 在中国大陆**对公众**提供用户上传服务，需要 ICP 备案，以及和主体匹配的许可。个人开发者可以先把服务放在只有自己能访问的机器上试用，不一定先备案。备案完成前不要把地址写进公开发布的安装包。
 
