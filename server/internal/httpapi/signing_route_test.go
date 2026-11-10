@@ -7,9 +7,10 @@ import (
 	"testing"
 )
 
-// The Mac signing build posts /v1/auth/login-password. This open-source server
-// does not implement that route and must not grow a second password hasher for
-// it. Production already has a different hasher behind /v1/hajimi/auth/login.
+// The Mac signing build posts these three 小moto paths. This server does not
+// implement them. Do not alias them to /v1/hajimi/auth/login: that handler is
+// not this user store, and a non-account 400 does not prove its token works
+// for /v1/me.
 func TestSigningLoginPasswordStaysUnimplementedHere(t *testing.T) {
 	handler, _ := openAuth(t, true, "review@example.com", "246810")
 	for _, path := range []string{"/v1/auth/login-password", "/v1/auth/reset-password", "/v1/auth/set-password", "/v1/auth/login"} {

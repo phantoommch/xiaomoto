@@ -350,7 +350,7 @@ curl -X POST https://example.invalid/v1/admin/app \
 1. 安装 Docker。国内机器拉 `golang` / `debian` 镜像可能要配镜像加速。
 2. 在仓库根目录设置 `ADMIN_TOKEN`，执行 `docker compose up -d --build`。
 3. 前面加 Nginx 或 Caddy，只暴露 HTTPS。iOS 不再设置 `NSAllowsArbitraryLoads`，只走系统默认的 HTTPS。
-4. 把服务器根地址写进 Android 的 `COMMUNITY_API_BASE_URL`，或 iOS 的 `Config/Shared.xcconfig`。签名工程里的正式地址是 `https://api.xiaomoto.cloud`，不要写成下载域名 `https://dl.xiaomoto.cloud`，也不要在根地址后面再加路径。iOS 设置里不能改这个地址。Android 设置页长按标题约 3 秒可以改。这个地址要和 `PUBLIC_BASE_URL` 相同，点位下载用它。Android 检查更新也用它。签名工程的密码登录请求是 `POST /v1/hajimi/auth/login`，正文只有 `email` 和 `password`。不要再请求 `POST /v1/auth/login-password`。不要用本仓库的服务端代替上海现网的密码校验。
+4. 把服务器根地址写进 Android 的 `COMMUNITY_API_BASE_URL`，或 iOS 的 `Config/Shared.xcconfig`。签名工程里的正式地址是 `https://api.xiaomoto.cloud`，不要写成下载域名 `https://dl.xiaomoto.cloud`，也不要在根地址后面再加路径。iOS 设置里不能改这个地址。Android 设置页长按标题约 3 秒可以改。这个地址要和 `PUBLIC_BASE_URL` 相同，点位下载用它。Android 检查更新也用它。签名工程的密码登录、重置密码、设置密码分别是 `POST /v1/auth/login-password`、`POST /v1/auth/reset-password`、`POST /v1/auth/set-password`。不要把这些请求改到 `/v1/hajimi/auth/login`。本仓库的 `users` 表没有密码列，不能当成现网密码校验的实现。
 
 在中国大陆**对公众**提供用户上传服务，需要 ICP 备案，以及和主体匹配的许可。个人开发者可以先把服务放在只有自己能访问的机器上试用，不一定先备案。备案完成前不要把地址写进公开发布的安装包。
 
