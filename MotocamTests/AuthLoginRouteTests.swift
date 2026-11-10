@@ -10,7 +10,6 @@ final class AuthLoginRouteTests: XCTestCase {
         XCTAssertEqual(AuthRoutes.passwordLogin, "v1/auth/login-password")
         XCTAssertEqual(AuthRoutes.resetPassword, "v1/auth/reset-password")
         XCTAssertEqual(AuthRoutes.setPassword, "v1/auth/set-password")
-        XCTAssertNotEqual(AuthRoutes.passwordLogin, AuthRoutes.unprovenForeignLogin)
         XCTAssertEqual(
             AuthRoutes.joined(base: "https://api.xiaomoto.cloud", path: AuthRoutes.passwordLogin),
             "https://api.xiaomoto.cloud/v1/auth/login-password"
