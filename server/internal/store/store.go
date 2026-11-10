@@ -318,8 +318,6 @@ CREATE INDEX IF NOT EXISTS idx_auth_limits_lookup ON auth_limits(scope, key, cre
 		{"points", "source", "TEXT NOT NULL DEFAULT ''"},
 		{"points", "review_result", "TEXT NOT NULL DEFAULT ''"},
 		{"points", "review_reason", "TEXT NOT NULL DEFAULT ''"},
-		{"users", "password_hash", "TEXT NOT NULL DEFAULT ''"},
-		{"users", "password_salt", "TEXT NOT NULL DEFAULT ''"},
 	}
 	for _, col := range extra {
 		if err := s.ensureColumn(col.table, col.name, col.decl); err != nil {

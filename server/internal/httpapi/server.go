@@ -101,7 +101,6 @@ func NewWithOptions(opts HandlerOptions) http.Handler {
 	mux.HandleFunc("POST /v1/auth/request-code", s.requestCode)
 	mux.HandleFunc("POST /v1/auth/verify", s.verifyCode)
 	mux.HandleFunc("POST /v1/auth/logout", s.logout)
-	s.routePassword(mux)
 	mux.HandleFunc("GET /v1/me", s.me)
 	mux.HandleFunc("GET /v1/me/reports", s.myReports)
 	mux.HandleFunc("DELETE /v1/me", s.deleteMe)

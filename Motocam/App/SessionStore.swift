@@ -74,34 +74,19 @@ enum AuthClientError: LocalizedError {
 
 enum AuthClient {
     static func requestCode(baseURL: String, email: String) async throws {
-        let json = try await send(baseURL: baseURL, path: APIPath.requestCode, method: "POST", body: ["email": email], token: nil)
+        let json = try await send(baseURL: baseURL, path: "v1/auth/request-code", method: "POST", body: ["email": email], token: nil)
         if json["ok"] as? Bool == true { return }
         throw AuthClientError.failed((json["error"] as? String) ?? "获取激活码失败")
-    }
-
-    static func passwordLogin(baseURL: String, email: String, password: String) async throws -> AuthSession {
-        let json = try await send(
-            baseURL: baseURL,
-            path: APIPath.passwordLogin,
-            method: "POST",
-            body: ["email": email, "password": password],
-            token: nil
-        )
-        return try session(from: json, email: email, termsVersion: "")
     }
 
     static func verify(baseURL: String, email: String, code: String, termsVersion: String) async throws -> AuthSession {
         let json = try await send(
             baseURL: baseURL,
-            path: APIPath.verify,
+            path: "v1/auth/verify",
             method: "POST",
             body: ["email": email, "code": code, "termsVersion": termsVersion],
             token: nil
         )
-        return try session(from: json, email: email, termsVersion: termsVersion)
-    }
-
-    private static func session(from json: [String: Any], email: String, termsVersion: String) throws -> AuthSession {
         guard let token = json["token"] as? String, !token.isEmpty else {
             throw AuthClientError.failed("登录没有返回凭证")
         }
@@ -114,7 +99,7 @@ enum AuthClient {
     }
 
     static func me(baseURL: String) async throws -> AccountProfile {
-        let json = try await send(baseURL: baseURL, path: APIPath.me, method: "GET", body: nil, token: SessionToken.current())
+        let json = try await send(baseURL: baseURL, path: "v1/me", method: "GET", body: nil, token: SessionToken.current())
         return AccountProfile(
             email: json["email"] as? String ?? "",
             termsVersion: json["termsVersion"] as? String ?? "",
@@ -124,17 +109,17 @@ enum AuthClient {
     }
 
     static func logout(baseURL: String) async throws {
-        _ = try await send(baseURL: baseURL, path: APIPath.logout, method: "POST", body: nil, token: SessionToken.current())
+        _ = try await send(baseURL: baseURL, path: "v1/auth/logout", method: "POST", body: nil, token: SessionToken.current())
     }
 
     static func deleteAccount(baseURL: String) async throws {
-        _ = try await send(baseURL: baseURL, path: APIPath.me, method: "DELETE", body: nil, token: SessionToken.current())
+        _ = try await send(baseURL: baseURL, path: "v1/me", method: "DELETE", body: nil, token: SessionToken.current())
     }
 
     static func accept(baseURL: String, version: String) async throws {
         _ = try await send(
             baseURL: baseURL,
-            path: APIPath.acceptTerms,
+            path: "v1/legal/accept",
             method: "POST",
             body: ["version": version],
             token: SessionToken.current()
@@ -142,7 +127,7 @@ enum AuthClient {
     }
 
     static func terms(baseURL: String) async throws -> TermsDocument {
-        let json = try await send(baseURL: baseURL, path: APIPath.terms, method: "GET", body: nil, token: nil)
+        let json = try await send(baseURL: baseURL, path: "v1/legal/terms", method: "GET", body: nil, token: nil)
         let markdown = json["markdown"] as? String ?? ""
         if markdown.isEmpty { throw AuthClientError.failed("协议是空的") }
         return TermsDocument(
@@ -159,8 +144,10 @@ enum AuthClient {
         body: [String: String]?,
         token: String?
     ) async throws -> [String: Any] {
-        guard !baseURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw AuthClientError.notConfigured }
-        guard let url = APIURL.resolve(baseURL, path) else { throw AuthClientError.failed("服务器地址无效") }
+        var trimmed = baseURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { throw AuthClientError.notConfigured }
+        while trimmed.hasSuffix("/") { trimmed.removeLast() }
+        guard let url = URL(string: trimmed + "/" + path) else { throw AuthClientError.failed("服务器地址无效") }
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.timeoutInterval = 20

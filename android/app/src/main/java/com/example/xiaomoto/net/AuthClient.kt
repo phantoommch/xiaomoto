@@ -2,8 +2,6 @@ package com.example.xiaomoto.net
 
 import com.example.xiaomoto.BuildConfig
 import com.example.xiaomoto.MotoApplication
-import com.example.xiaomoto.core.APIPath
-import com.example.xiaomoto.core.APIURL
 import java.io.BufferedReader
 import java.net.HttpURLConnection
 import java.net.URL
@@ -46,7 +44,7 @@ object AuthClient {
     )
 
     fun myReports(baseUrl: String, token: String): List<MineReport> {
-        val json = call(baseUrl, APIPath.myReports, "GET", null, token)
+        val json = call(baseUrl, "v1/me/reports", "GET", null, token)
         val rows = json.optJSONArray("reports") ?: return emptyList()
         return buildList {
             for (index in 0 until rows.length()) {
@@ -65,7 +63,7 @@ object AuthClient {
     }
 
     fun requestCode(baseUrl: String, email: String) {
-        val json = call(baseUrl, APIPath.requestCode, "POST", JSONObject().put("email", email), null)
+        val json = call(baseUrl, "v1/auth/request-code", "POST", JSONObject().put("email", email), null)
         if (json.optBoolean("ok")) return
         throw AuthException(json.optString("error").ifBlank { "获取激活码失败" }, 200)
     }
@@ -75,7 +73,7 @@ object AuthClient {
             .put("email", email)
             .put("code", code)
             .put("termsVersion", termsVersion)
-        val json = call(baseUrl, APIPath.verify, "POST", body, null)
+        val json = call(baseUrl, "v1/auth/verify", "POST", body, null)
         val token = json.optString("token")
         if (token.isBlank()) throw AuthException("登录没有返回凭证", 200)
         val user = json.optJSONObject("user")
@@ -87,7 +85,7 @@ object AuthClient {
     }
 
     fun me(baseUrl: String, token: String): Me {
-        val json = call(baseUrl, APIPath.me, "GET", null, token)
+        val json = call(baseUrl, "v1/me", "GET", null, token)
         return Me(
             email = json.optString("email"),
             termsVersion = json.optString("termsVersion"),
@@ -97,19 +95,19 @@ object AuthClient {
     }
 
     fun logout(baseUrl: String, token: String) {
-        call(baseUrl, APIPath.logout, "POST", null, token)
+        call(baseUrl, "v1/auth/logout", "POST", null, token)
     }
 
     fun deleteAccount(baseUrl: String, token: String) {
-        call(baseUrl, APIPath.me, "DELETE", null, token)
+        call(baseUrl, "v1/me", "DELETE", null, token)
     }
 
     fun acceptTerms(baseUrl: String, token: String, version: String) {
-        call(baseUrl, APIPath.acceptTerms, "POST", JSONObject().put("version", version), token)
+        call(baseUrl, "v1/legal/accept", "POST", JSONObject().put("version", version), token)
     }
 
     fun terms(baseUrl: String): TermsDoc {
-        val json = call(baseUrl, APIPath.terms, "GET", null, null)
+        val json = call(baseUrl, "v1/legal/terms", "GET", null, null)
         return TermsDoc(
             version = json.optString("version").ifBlank { "1.0" },
             title = json.optString("title").ifBlank { "用户协议与免责声明" },
@@ -159,7 +157,12 @@ object AuthClient {
     }
 
     private fun endpoint(raw: String, path: String): String {
-        if (raw.trim().isEmpty()) throw AuthException("还没有服务器地址", 0)
-        return APIURL.resolve(raw, path) ?: throw AuthException("服务器地址无效", 0)
+        var trimmed = raw.trim()
+        if (trimmed.isEmpty()) throw AuthException("还没有服务器地址", 0)
+        while (trimmed.endsWith("/")) trimmed = trimmed.dropLast(1)
+        if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
+            throw AuthException("服务器地址无效", 0)
+        }
+        return "$trimmed/$path"
     }
 }
