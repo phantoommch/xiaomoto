@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"motocam/server/internal/appdist"
+	"motocam/server/internal/asc"
 	"motocam/server/internal/config"
 	"motocam/server/internal/httpapi"
 	"motocam/server/internal/legal"
@@ -48,6 +50,31 @@ func main() {
 	if cfg.AmapKey == "" {
 		log.Println("警告：未设置 AMAP_KEY，低置信度上报不会在服务器上重定位")
 	}
+	switch {
+	case cfg.AdminPasswordHash == "" && cfg.AdminPassword == "":
+		log.Println("未设置 ADMIN_PASSWORD_HASH 或 ADMIN_PASSWORD，/admin 返回 404")
+	case cfg.AdminPasswordHash != "" && cfg.AdminPassword != "":
+		log.Println("同时设置了 ADMIN_PASSWORD_HASH 和 ADMIN_PASSWORD，只使用哈希")
+	}
+	if cfg.AdminHost == "" && (cfg.AdminPasswordHash != "" || cfg.AdminPassword != "") {
+		log.Println("警告：未设置 ADMIN_HOST，任何 Host 都能打开 /admin 登录页")
+	}
+	var missingASC []string
+	if cfg.ASCKeyID == "" {
+		missingASC = append(missingASC, "ASC_KEY_ID")
+	}
+	if cfg.ASCIssuerID == "" {
+		missingASC = append(missingASC, "ASC_ISSUER_ID")
+	}
+	if cfg.ASCKeyPath == "" {
+		missingASC = append(missingASC, "ASC_KEY_PATH")
+	}
+	if cfg.ASCAppID == "" {
+		missingASC = append(missingASC, "ASC_APP_ID")
+	}
+	if len(missingASC) > 0 && len(missingASC) < 4 {
+		log.Printf("ASC_* 未配齐（缺少 %s），管理页 iPhone 测试版显示为未配置", strings.Join(missingASC, "、"))
+	}
 	db, err := store.Open(filepath.Join(cfg.DataDir, "motocam.db"), filepath.Join(cfg.DataDir, "images"), store.Limits{
 		PromoteMin:     cfg.PromoteMin,
 		PromoteRadiusM: cfg.PromoteRadiusM,
@@ -59,20 +86,25 @@ func main() {
 	}
 	defer db.Close()
 	handler := httpapi.NewWithOptions(httpapi.HandlerOptions{
-		AdminToken:       cfg.AdminToken,
-		MaxImage:         cfg.MaxImageBytes,
-		DB:               db,
-		Apps:             apps,
-		PublicBase:       cfg.PublicBaseURL,
-		DevMode:          cfg.AuthDev,
-		ReviewEmail:      cfg.ReviewEmail,
-		ReviewCode:       cfg.ReviewCode,
-		ReviewPassword:   cfg.ReviewPassword,
-		TermsPath:        termsPath,
-		TermsVersion:     cfg.TermsVersion,
-		Mail:             cfg.Mail,
-		AmapKey:          cfg.AmapKey,
-		ReprocessOnStart: cfg.AmapKey != "",
+		AdminToken:        cfg.AdminToken,
+		MaxImage:          cfg.MaxImageBytes,
+		DB:                db,
+		Apps:              apps,
+		PublicBase:        cfg.PublicBaseURL,
+		DevMode:           cfg.AuthDev,
+		ReviewEmail:       cfg.ReviewEmail,
+		ReviewCode:        cfg.ReviewCode,
+		ReviewPassword:    cfg.ReviewPassword,
+		TermsPath:         termsPath,
+		TermsVersion:      cfg.TermsVersion,
+		Mail:              cfg.Mail,
+		AmapKey:           cfg.AmapKey,
+		ReprocessOnStart:  cfg.AmapKey != "",
+		AdminPasswordHash: cfg.AdminPasswordHash,
+		AdminPassword:     cfg.AdminPassword,
+		AdminHost:         cfg.AdminHost,
+		StatsTestEmails:   cfg.StatsTestEmails,
+		TestFlight:        asc.Open(cfg.ASCKeyID, cfg.ASCIssuerID, cfg.ASCKeyPath, cfg.ASCAppID),
 	})
 	server := &http.Server{
 		Addr:              cfg.Addr,

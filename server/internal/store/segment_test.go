@@ -78,7 +78,7 @@ func TestApplyRelocationPublishesAndSkipsClosed(t *testing.T) {
 		Name: "另一条", Type: "camera", Confidence: "low", ForceReview: true,
 		Latitude: 31, Longitude: 121,
 	}, 2))
-	if err := st.Reject(rejected.ID); err != nil {
+	if err := st.Reject(rejected.ID, ""); err != nil {
 		t.Fatal(err)
 	}
 	again, err := st.ApplyRelocation(rejected.ID, ReportInput{

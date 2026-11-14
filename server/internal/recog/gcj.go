@@ -37,6 +37,12 @@ func gcjToWGS(lat, lon float64) (float64, float64) {
 	return gLat, gLon
 }
 
+// WGSToGCJ converts a stored WGS-84 point to GCJ-02 for AMap display.
+func WGSToGCJ(lat, lon float64) (float64, float64) { return wgsToGCJ(lat, lon) }
+
+// GCJToWGS converts a 高德 GCJ-02 point back to stored WGS-84.
+func GCJToWGS(lat, lon float64) (float64, float64) { return gcjToWGS(lat, lon) }
+
 const (
 	a  = 6378245.0
 	ee = 0.00669342162296594323

@@ -25,25 +25,43 @@ type Config struct {
 	TermsVersion   string
 	Mail           mail.Config
 	AmapKey        string
+	// Owner stats page (/admin). Disabled when neither password is set.
+	AdminPasswordHash string
+	AdminPassword     string
+	AdminHost         string
+	StatsTestEmails   []string
+	// App Store Connect (TestFlight block on /admin). All four, or unconfigured.
+	ASCKeyID    string
+	ASCIssuerID string
+	ASCKeyPath  string
+	ASCAppID    string
 }
 
 func FromEnv() Config {
 	cfg := Config{
-		Addr:           env("ADDR", ":8787"),
-		DataDir:        env("DATA_DIR", "data"),
-		AdminToken:     os.Getenv("ADMIN_TOKEN"),
-		PromoteMin:     envInt("PROMOTE_MIN_REPORTS", 1),
-		PromoteRadiusM: envFloat("PROMOTE_RADIUS_M", 200),
-		RatePerHour:    envInt("RATE_PER_HOUR", 200),
-		RatePerDay:     envInt("RATE_PER_DAY", 1000),
-		MaxImageBytes:  envInt("MAX_IMAGE_BYTES", 5<<20),
-		PublicBaseURL:  strings.TrimRight(strings.TrimSpace(os.Getenv("PUBLIC_BASE_URL")), "/"),
-		AuthDev:        envBool("AUTH_DEV"),
-		ReviewEmail:    strings.ToLower(strings.TrimSpace(os.Getenv("REVIEW_EMAIL"))),
-		ReviewCode:     strings.TrimSpace(os.Getenv("REVIEW_CODE")),
-		ReviewPassword: strings.TrimSpace(os.Getenv("REVIEW_PASSWORD")),
-		TermsVersion:   strings.TrimSpace(os.Getenv("TERMS_VERSION")),
-		AmapKey:        strings.TrimSpace(os.Getenv("AMAP_KEY")),
+		Addr:              env("ADDR", ":8787"),
+		DataDir:           env("DATA_DIR", "data"),
+		AdminToken:        os.Getenv("ADMIN_TOKEN"),
+		PromoteMin:        envInt("PROMOTE_MIN_REPORTS", 1),
+		PromoteRadiusM:    envFloat("PROMOTE_RADIUS_M", 200),
+		RatePerHour:       envInt("RATE_PER_HOUR", 200),
+		RatePerDay:        envInt("RATE_PER_DAY", 1000),
+		MaxImageBytes:     envInt("MAX_IMAGE_BYTES", 5<<20),
+		PublicBaseURL:     strings.TrimRight(strings.TrimSpace(os.Getenv("PUBLIC_BASE_URL")), "/"),
+		AuthDev:           envBool("AUTH_DEV"),
+		ReviewEmail:       strings.ToLower(strings.TrimSpace(os.Getenv("REVIEW_EMAIL"))),
+		ReviewCode:        strings.TrimSpace(os.Getenv("REVIEW_CODE")),
+		ReviewPassword:    strings.TrimSpace(os.Getenv("REVIEW_PASSWORD")),
+		TermsVersion:      strings.TrimSpace(os.Getenv("TERMS_VERSION")),
+		AmapKey:           strings.TrimSpace(os.Getenv("AMAP_KEY")),
+		AdminPasswordHash: strings.TrimSpace(os.Getenv("ADMIN_PASSWORD_HASH")),
+		AdminPassword:     strings.TrimSpace(os.Getenv("ADMIN_PASSWORD")),
+		AdminHost:         strings.ToLower(strings.TrimSpace(os.Getenv("ADMIN_HOST"))),
+		ASCKeyID:          strings.TrimSpace(os.Getenv("ASC_KEY_ID")),
+		ASCIssuerID:       strings.TrimSpace(os.Getenv("ASC_ISSUER_ID")),
+		ASCKeyPath:        strings.TrimSpace(os.Getenv("ASC_KEY_PATH")),
+		ASCAppID:          strings.TrimSpace(os.Getenv("ASC_APP_ID")),
+		StatsTestEmails:   splitList(os.Getenv("STATS_TEST_EMAILS")),
 		Mail: mail.Config{
 			Host: os.Getenv("SMTP_HOST"),
 			Port: os.Getenv("SMTP_PORT"),
@@ -109,4 +127,14 @@ func envFloat(key string, fallback float64) float64 {
 		return fallback
 	}
 	return value
+}
+
+func splitList(raw string) []string {
+	var out []string
+	for _, part := range strings.Split(raw, ",") {
+		if part = strings.ToLower(strings.TrimSpace(part)); part != "" {
+			out = append(out, part)
+		}
+	}
+	return out
 }

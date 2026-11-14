@@ -164,6 +164,9 @@ type AdminPoint struct {
 	ReviewResult string  `json:"review_result"`
 	ReviewReason string  `json:"review_reason"`
 	UpdatedAt    string  `json:"updated_at"`
+	Notes        string  `json:"notes,omitempty"`
+	Violation    string  `json:"violation,omitempty"`
+	FineYuan     *int    `json:"fine_yuan,omitempty"`
 }
 
 type Store struct {
@@ -326,7 +329,10 @@ CREATE INDEX IF NOT EXISTS idx_auth_limits_lookup ON auth_limits(scope, key, cre
 			return err
 		}
 	}
-	return s.backfillPointSource()
+	if err := s.backfillPointSource(); err != nil {
+		return err
+	}
+	return s.migrateStats()
 }
 
 // backfillPointSource runs once. Points whose reports are all from the import

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"motocam/server/internal/appdist"
+	"motocam/server/internal/asc"
 	"motocam/server/internal/imageutil"
 	"motocam/server/internal/mail"
 	"motocam/server/internal/recog"
@@ -29,6 +30,8 @@ type Server struct {
 	relocDeadline time.Duration
 	relocQueue    int
 	jobs          chan relocJob
+	stats         statsSettings
+	testflight    *asc.Cache
 }
 
 type HandlerOptions struct {
@@ -49,6 +52,13 @@ type HandlerOptions struct {
 	RelocDeadline    time.Duration
 	RelocQueue       int
 	ReprocessOnStart bool
+	// Owner stats page. Disabled when neither password is set.
+	AdminPasswordHash string
+	AdminPassword     string
+	AdminHost         string
+	StatsTestEmails   []string
+	// Nil when App Store Connect is not configured.
+	TestFlight *asc.Cache
 }
 
 func New(adminToken string, maxImageBytes int, db *store.Store) http.Handler {
@@ -90,6 +100,8 @@ func NewWithOptions(opts HandlerOptions) http.Handler {
 		locate:        opts.Locate,
 		relocDeadline: opts.RelocDeadline,
 		relocQueue:    opts.RelocQueue,
+		stats:         newStatsSettings(opts),
+		testflight:    opts.TestFlight,
 	}
 	s.startRelocator()
 	if opts.ReprocessOnStart {
@@ -100,6 +112,19 @@ func NewWithOptions(opts HandlerOptions) http.Handler {
 	mux.HandleFunc("GET /privacy", s.privacyPage)
 	mux.HandleFunc("GET /terms", s.termsPage)
 	mux.HandleFunc("GET /support", s.supportPage)
+	mux.HandleFunc("GET /download", s.downloadPage)
+	mux.HandleFunc("GET /download/{$}", s.downloadSlash)
+	mux.HandleFunc("GET /download/android", s.downloadAndroid)
+	mux.HandleFunc("GET /download/icon.png", s.downloadIconPNG)
+	mux.HandleFunc("GET /download/ios", s.downloadIOS)
+	mux.HandleFunc("GET /admin", s.adminPage)
+	mux.HandleFunc("GET /admin/{$}", s.adminSlash)
+	mux.HandleFunc("POST /admin/login", s.adminLogin)
+	mux.HandleFunc("POST /admin/logout", s.adminLogout)
+	mux.HandleFunc("GET /admin/reports/{id}/image", s.adminSessionImage)
+	mux.HandleFunc("POST /admin/reports/{id}/approve", s.adminSessionApprove)
+	mux.HandleFunc("POST /admin/reports/{id}/reject", s.adminSessionReject)
+	mux.HandleFunc("GET /admin/points.csv", s.adminSessionPointsCSV)
 	mux.HandleFunc("POST /v1/auth/request-code", s.requestCode)
 	mux.HandleFunc("POST /v1/auth/verify", s.verifyCode)
 	mux.HandleFunc("POST /v1/auth/logout", s.logout)
@@ -304,7 +329,12 @@ func (s *Server) approve(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) reject(w http.ResponseWriter, r *http.Request) {
-	if err := s.db.Reject(r.PathValue("id")); err != nil {
+	var body struct {
+		Reason string `json:"reason"`
+	}
+	// Reason is optional. Clients that post no body still reject the report.
+	_ = json.NewDecoder(r.Body).Decode(&body)
+	if err := s.db.Reject(r.PathValue("id"), body.Reason); err != nil {
 		writeStored(w, err)
 		return
 	}
