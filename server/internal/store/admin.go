@@ -151,6 +151,56 @@ FROM points ORDER BY updated_at DESC LIMIT ?`, limit)
 	return out, rows.Err()
 }
 
+// AdminPointsQuery lists published points for the stats page and CSV export.
+// q matches name, road code, road name, stake, or violation. typ is an exact type.
+func (s *Store) AdminPointsQuery(q, typ string, limit int) ([]AdminPoint, error) {
+	if limit <= 0 || limit > 5000 {
+		limit = 5000
+	}
+	query := `
+SELECT id, name, type, road_code, road_name, notes, latitude, longitude, fine_yuan,
+       violation, stake, direction, source, review_result, review_reason, updated_at
+FROM points WHERE 1=1`
+	args := []any{}
+	if q = strings.TrimSpace(q); q != "" {
+		like := "%" + escapeLike(q) + "%"
+		query += ` AND (name LIKE ? ESCAPE '\' OR road_code LIKE ? ESCAPE '\' OR road_name LIKE ? ESCAPE '\' OR stake LIKE ? ESCAPE '\' OR violation LIKE ? ESCAPE '\')`
+		args = append(args, like, like, like, like, like)
+	}
+	if typ = strings.TrimSpace(typ); typ != "" {
+		query += ` AND type=?`
+		args = append(args, typ)
+	}
+	query += ` ORDER BY updated_at DESC LIMIT ?`
+	args = append(args, limit)
+	rows, err := s.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []AdminPoint{}
+	for rows.Next() {
+		var p AdminPoint
+		var fine sql.NullInt64
+		if err := rows.Scan(
+			&p.ID, &p.Name, &p.Type, &p.RoadCode, &p.RoadName, &p.Notes, &p.Latitude, &p.Longitude, &fine,
+			&p.Violation, &p.Stake, &p.Direction, &p.Source, &p.ReviewResult, &p.ReviewReason, &p.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		p.FineYuan = nullInt(fine)
+		out = append(out, p)
+	}
+	return out, rows.Err()
+}
+
+func escapeLike(s string) string {
+	s = strings.ReplaceAll(s, `\`, `\\`)
+	s = strings.ReplaceAll(s, `%`, `\%`)
+	s = strings.ReplaceAll(s, `_`, `\_`)
+	return s
+}
+
 func (s *Store) Approve(id string) error {
 	tx, err := s.db.Begin()
 	if err != nil {
@@ -210,7 +260,7 @@ func (s *Store) Approve(id string) error {
 	return nil
 }
 
-func (s *Store) Reject(id string) error {
+func (s *Store) Reject(id, reason string) error {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return err
@@ -223,8 +273,15 @@ func (s *Store) Reject(id string) error {
 	if report.Status != "pending" {
 		return ErrConflict
 	}
-	if _, err := tx.Exec(`UPDATE reports SET status='rejected', image_path='' WHERE id=?`, id); err != nil {
-		return err
+	reason = trimRunes(strings.TrimSpace(reason), 200)
+	var execErr error
+	if reason != "" {
+		_, execErr = tx.Exec(`UPDATE reports SET status='rejected', image_path='', review_reason=? WHERE id=?`, reason, id)
+	} else {
+		_, execErr = tx.Exec(`UPDATE reports SET status='rejected', image_path='' WHERE id=?`, id)
+	}
+	if execErr != nil {
+		return execErr
 	}
 	if err := tx.Commit(); err != nil {
 		return err

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"motocam/server/internal/appdist"
+	"motocam/server/internal/store"
 )
 
 const iosBundleID = "com.example.xiaomoto"
@@ -106,6 +107,9 @@ func (s *Server) downloadApp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(w, http.StatusNotFound, "还没有发布")
 		return
+	}
+	if strings.EqualFold(platform, "android") {
+		s.countDownload(r, store.DownloadAndroidAPK)
 	}
 	w.Header().Set("Content-Type", appContentType(platform))
 	http.ServeContent(w, r, name, info.ModTime(), file)
